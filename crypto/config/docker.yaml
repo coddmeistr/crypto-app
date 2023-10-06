@@ -1,0 +1,17 @@
+database:
+  host: postgres://admin:root@postgres:5432/database
+
+http:
+  session_domain: appdomain
+  secret: secret
+
+server:
+  port: :8181
+  appid: appid
+  key: secret_key
+
+env:
+  mode: debug
+  
+auth:
+  cas: https://domain

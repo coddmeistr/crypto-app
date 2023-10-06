@@ -1,0 +1,53 @@
+basePath: /v1/crypto
+definitions:
+  gorm.DeletedAt:
+    properties:
+      time:
+        type: string
+      valid:
+        description: Valid is true if Time is not NULL
+        type: boolean
+    type: object
+  models.Currency:
+    properties:
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      id:
+        type: integer
+      name:
+        type: string
+      tousd:
+        type: number
+      updatedAt:
+        type: string
+    type: object
+info:
+  contact:
+    email: euseew.maxim2015@yandex.ru
+    name: API Support
+  description: Swagger API for Golang Project Crypto Service.
+  license:
+    name: EUS
+  termsOfService: http://swagger.io/terms/
+  title: Crypto Service API
+  version: "1.0"
+paths:
+  /{id}:
+    get:
+      parameters:
+      - description: Currency ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Currency'
+      summary: Retrieves account based on given ID
+swagger: "2.0"
