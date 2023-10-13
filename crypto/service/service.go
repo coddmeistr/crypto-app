@@ -1,31 +1,34 @@
 package service
 
 import (
-	"github.com/maxim12233/crypto-app-server/crypto/models"
+	coinmarket "github.com/maxim12233/crypto-app-server/crypto/coinmarketsdk"
 	"github.com/maxim12233/crypto-app-server/crypto/repository"
 	"go.uber.org/zap"
 )
 
-type IAccountService interface {
-	GetAccountInfoById(id uint) (*models.Currency, error)
+type ICryptoService interface {
+	GetQuote(slug string) (coinmarket.USD, error)
 }
 
-type AccountService struct {
+type CryptoService struct {
 	repo   repository.IAccountRepository
+	market coinmarket.ICoinMarket
 	logger *zap.Logger
 }
 
-func NewAccountService(repo repository.IAccountRepository, logger *zap.Logger) IAccountService {
-	return AccountService{
+func NewCryptoService(repo repository.IAccountRepository, logger *zap.Logger, market coinmarket.ICoinMarket) ICryptoService {
+	return CryptoService{
 		repo:   repo,
 		logger: logger,
+		market: market,
 	}
 }
 
-func (s AccountService) GetAccountInfoById(id uint) (*models.Currency, error) {
-	account, err := s.repo.GetAccountInfoById(id)
+func (s CryptoService) GetQuote(slug string) (coinmarket.USD, error) {
+
+	quote, err := s.market.GetLatestQuotes(slug)
 	if err != nil {
-		return nil, err
+		return coinmarket.USD{}, err
 	}
-	return account, nil
+	return quote, nil
 }

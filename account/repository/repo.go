@@ -7,7 +7,9 @@ import (
 )
 
 type IAccountRepository interface {
-	GetAccountInfoById(id uint) (*models.Account, error)
+	GetAccountById(id uint) (*models.Account, error)
+	CreateAccount(a models.Account) error
+	DeleteAccountById(id uint) error
 }
 
 type AccountRepository struct {
@@ -22,10 +24,28 @@ func NewAccountRepository(db *gorm.DB, logger *zap.Logger) IAccountRepository {
 	}
 }
 
-func (r *AccountRepository) GetAccountInfoById(id uint) (*models.Account, error) {
-	return &models.Account{
-		Login:        "login",
-		PasswordHash: "rfedg",
-		Email:        "euseew.maxim2015@yandex.ru",
-	}, nil
+func (r *AccountRepository) GetAccountById(id uint) (*models.Account, error) {
+	var a models.Account
+	result := r.db.Find(&a, id)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &a, nil
+}
+
+func (r *AccountRepository) CreateAccount(a models.Account) error {
+	result := r.db.Create(&a)
+	if result.Error != nil {
+		return result.Error
+	}
+
+	return nil
+}
+
+func (r *AccountRepository) DeleteAccountById(id uint) error {
+	result := r.db.Model(&models.Account{}).Delete(id)
+	if result.Error != nil {
+		return result.Error
+	}
+	return nil
 }

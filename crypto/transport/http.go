@@ -10,7 +10,7 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
-func NewHTTPServer(eps endpoints.AccountEndpoint) *gin.Engine {
+func NewHTTPServer(eps endpoints.CryptoEndpoint) *gin.Engine {
 	router := gin.Default()
 	c := config.GetConfig()
 	if c.GetString("env.mode") != "debug" {
@@ -25,7 +25,7 @@ func NewHTTPServer(eps endpoints.AccountEndpoint) *gin.Engine {
 	{
 		accountGroup := v1.Group("crypto")
 		{
-			accountGroup.GET("/:id", eps.GetAccount)
+			accountGroup.GET("/:slug", eps.GetQuote)
 		}
 	}
 

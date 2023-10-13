@@ -5,13 +5,13 @@ import (
 	"github.com/maxim12233/crypto-app-server/crypto/service"
 )
 
-type AccountEndpoint struct {
-	GetAccount gin.HandlerFunc
+type CryptoEndpoint struct {
+	GetQuote gin.HandlerFunc
 }
 
-func NewAccountEndpoint(s service.IAccountService) AccountEndpoint {
-	eps := AccountEndpoint{
-		GetAccount: MakeGetAccountEndpoint(s),
+func NewCryptoEndpoint(s service.ICryptoService) CryptoEndpoint {
+	eps := CryptoEndpoint{
+		GetQuote: MakeGetQuoteEndpoint(s),
 	}
 
 	return eps

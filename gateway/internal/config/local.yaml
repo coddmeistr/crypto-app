@@ -1,0 +1,18 @@
+http:
+  session_domain: appdomain
+  secret: secret
+
+server:
+  port: :8282
+  appid: appid
+  secret_key: dfg4sdgssefg34egdgghdfgd
+
+env:
+  mode: debug
+  
+auth:
+  cas: https://domain
+  jwtexphours: 1
+
+account_service:
+  url: http://localhost:8080/v1

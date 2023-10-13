@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 
+	coinmarket "github.com/maxim12233/crypto-app-server/crypto/coinmarketsdk"
 	"github.com/maxim12233/crypto-app-server/crypto/config"
 	"github.com/maxim12233/crypto-app-server/crypto/endpoints"
 	"github.com/maxim12233/crypto-app-server/crypto/repository"
@@ -42,8 +43,9 @@ func main() {
 
 	logger := config.InitializeLogger()
 
+	market := coinmarket.NewCoinMarket("7a8bbca0-8f16-434a-811c-bfe18bcc14fc")
 	repo := repository.NewAccountRepository(dbSession, logger)
-	svc := service.NewAccountService(repo, logger)
-	eps := endpoints.NewAccountEndpoint(svc)
+	svc := service.NewCryptoService(repo, logger, market)
+	eps := endpoints.NewCryptoEndpoint(svc)
 	transport.NewHttpHandler(eps)
 }

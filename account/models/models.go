@@ -8,3 +8,9 @@ type Account struct {
 	PasswordHash string `json:"-"`
 	Email        string `json:"email"`
 }
+
+type CreateAccountRequest struct {
+	Login    string `json:"login"`
+	Password string `json:"password"`
+	Email    string `json:"email"`
+}

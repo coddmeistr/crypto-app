@@ -27,6 +27,8 @@ func NewHTTPServer(eps endpoints.AccountEndpoint) *gin.Engine {
 		accountGroup := v1.Group("account")
 		{
 			accountGroup.GET("/:id", eps.GetAccount)
+			accountGroup.DELETE("/:id", eps.DeleteAccount)
+			accountGroup.POST("/", eps.CreateAccount)
 		}
 	}
 

@@ -14,11 +14,15 @@ func Init(env string) {
 	var err error
 	v := viper.New()
 	v.SetConfigType("yaml")
+
 	v.SetConfigName(env)
+
 	v.AddConfigPath("../config/")
+	v.AddConfigPath("../internal/config/")
 	v.AddConfigPath("config/")
-	v.AddConfigPath("crypto-server/config/")
-	v.AddConfigPath("crypto/config/")
+	v.AddConfigPath("crypto-app/config/")
+	v.AddConfigPath("crypto-app/gateway/config/")
+
 	err = v.ReadInConfig()
 	if err != nil {
 		fmt.Println("panic", err)
