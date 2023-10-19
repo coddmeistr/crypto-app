@@ -20,6 +20,7 @@ var (
 	// Export errors
 	ErrIncorrectLoginOrPassword = errors.New("Incorrect login or password")
 	ErrNotEnoughBalance         = errors.New("User's account has not enough balance to perform this operation")
+	ErrSomeFunnyError           = errors.New("Some funny error:)")
 )
 
 var errorCodesMap = map[error]int{
