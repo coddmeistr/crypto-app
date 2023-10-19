@@ -1,4 +1,4 @@
 plan_for_backend.txt
 .vscode
-*.json
-README.*
+**/.json
+README.md
