@@ -1,4 +1,10 @@
 plan_for_backend.txt
 .vscode
 log.json
-*.md
+/README.md
+/README.txt
+/README
+README
+README.txt
+readme.txt
+readme
