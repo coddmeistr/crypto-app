@@ -103,3 +103,68 @@
 {"level":"info","ts":"2023-10-08T09:00:42.427+0300","caller":"cmd/main.go:36","msg":"bind application to host: localhost and port: :8282"}
 {"level":"info","ts":"2023-10-08T09:00:42.431+0300","caller":"cmd/main.go:63","msg":"application initialized and started"}
 {"level":"error","ts":"2023-10-08T09:00:45.548+0300","caller":"common/common.go:12","msg":"Unauthorized access"}
+{"level":"info","ts":"2023-10-14T23:53:00.825+0300","caller":"cmd/main.go:42","msg":"bind application to host: localhost and port: :8282"}
+{"level":"info","ts":"2023-10-14T23:53:00.829+0300","caller":"cmd/main.go:69","msg":"application initialized and started"}
+{"level":"error","ts":"2023-10-14T23:53:32.956+0300","caller":"common/common.go:12","msg":"Unauthorized access"}
+{"level":"info","ts":"2023-10-14T23:54:15.596+0300","caller":"cmd/main.go:42","msg":"bind application to host: localhost and port: :8282"}
+{"level":"info","ts":"2023-10-14T23:54:15.600+0300","caller":"cmd/main.go:69","msg":"application initialized and started"}
+{"level":"debug","ts":"2023-10-14T23:54:18.403+0300","caller":"crypto/service.go:42","msg":"Generating query and path parameters"}
+{"level":"debug","ts":"2023-10-14T23:54:18.403+0300","caller":"crypto/service.go:46","msg":"build url with resource"}
+{"level":"debug","ts":"2023-10-14T23:54:18.404+0300","caller":"crypto/service.go:52","msg":"create new request"}
+{"level":"debug","ts":"2023-10-14T23:54:18.404+0300","caller":"crypto/service.go:58","msg":"send request"}
+{"level":"debug","ts":"2023-10-14T23:55:09.398+0300","caller":"crypto/service.go:42","msg":"Generating query and path parameters"}
+{"level":"debug","ts":"2023-10-14T23:55:09.399+0300","caller":"crypto/service.go:46","msg":"build url with resource"}
+{"level":"debug","ts":"2023-10-14T23:55:09.399+0300","caller":"crypto/service.go:52","msg":"create new request"}
+{"level":"debug","ts":"2023-10-14T23:55:09.400+0300","caller":"crypto/service.go:58","msg":"send request"}
+{"level":"info","ts":"2023-10-14T23:57:16.155+0300","caller":"cmd/main.go:42","msg":"bind application to host: localhost and port: :8282"}
+{"level":"info","ts":"2023-10-14T23:57:16.160+0300","caller":"cmd/main.go:69","msg":"application initialized and started"}
+{"level":"debug","ts":"2023-10-14T23:57:18.615+0300","caller":"crypto/service.go:41","msg":"Generating query and path parameters"}
+{"level":"debug","ts":"2023-10-14T23:57:18.615+0300","caller":"crypto/service.go:45","msg":"build url with resource"}
+{"level":"debug","ts":"2023-10-14T23:57:18.615+0300","caller":"crypto/service.go:51","msg":"create new request"}
+{"level":"debug","ts":"2023-10-14T23:57:18.616+0300","caller":"crypto/service.go:57","msg":"send request"}
+{"level":"debug","ts":"2023-10-14T23:57:22.901+0300","caller":"crypto/service.go:41","msg":"Generating query and path parameters"}
+{"level":"debug","ts":"2023-10-14T23:57:22.901+0300","caller":"crypto/service.go:45","msg":"build url with resource"}
+{"level":"debug","ts":"2023-10-14T23:57:22.902+0300","caller":"crypto/service.go:51","msg":"create new request"}
+{"level":"debug","ts":"2023-10-14T23:57:22.902+0300","caller":"crypto/service.go:57","msg":"send request"}
+{"level":"info","ts":"2023-10-14T23:58:41.334+0300","caller":"cmd/main.go:42","msg":"bind application to host: localhost and port: :8282"}
+{"level":"info","ts":"2023-10-14T23:58:41.339+0300","caller":"cmd/main.go:69","msg":"application initialized and started"}
+{"level":"debug","ts":"2023-10-14T23:59:07.168+0300","caller":"crypto/service.go:41","msg":"Generating query and path parameters"}
+{"level":"debug","ts":"2023-10-14T23:59:07.168+0300","caller":"crypto/service.go:45","msg":"build url with resource"}
+{"level":"debug","ts":"2023-10-14T23:59:07.169+0300","caller":"crypto/service.go:51","msg":"create new request"}
+{"level":"debug","ts":"2023-10-14T23:59:07.169+0300","caller":"crypto/service.go:57","msg":"send request"}
+{"level":"info","ts":"2023-10-15T00:02:05.268+0300","caller":"cmd/main.go:42","msg":"bind application to host: localhost and port: :8282"}
+{"level":"info","ts":"2023-10-15T00:02:05.273+0300","caller":"cmd/main.go:69","msg":"application initialized and started"}
+{"level":"debug","ts":"2023-10-15T00:02:09.225+0300","caller":"crypto/service.go:42","msg":"Generating query and path parameters"}
+{"level":"debug","ts":"2023-10-15T00:02:09.226+0300","caller":"crypto/service.go:46","msg":"build url with resource"}
+{"level":"debug","ts":"2023-10-15T00:02:09.226+0300","caller":"crypto/service.go:52","msg":"create new request"}
+{"level":"debug","ts":"2023-10-15T00:02:09.226+0300","caller":"crypto/service.go:58","msg":"send request"}
+{"level":"info","ts":"2023-10-15T00:09:37.768+0300","caller":"cmd/main.go:42","msg":"bind application to host: localhost and port: :8282"}
+{"level":"info","ts":"2023-10-15T00:09:37.772+0300","caller":"cmd/main.go:69","msg":"application initialized and started"}
+{"level":"debug","ts":"2023-10-15T00:10:03.782+0300","caller":"crypto/service.go:41","msg":"Generating query and path parameters"}
+{"level":"debug","ts":"2023-10-15T00:10:03.783+0300","caller":"crypto/service.go:45","msg":"build url with resource"}
+{"level":"debug","ts":"2023-10-15T00:10:03.783+0300","caller":"crypto/service.go:51","msg":"create new request"}
+{"level":"debug","ts":"2023-10-15T00:10:03.783+0300","caller":"crypto/service.go:57","msg":"send request"}
+{"level":"info","ts":"2023-10-16T21:44:53.182+0300","caller":"cmd/main.go:42","msg":"bind application to host: localhost and port: :8282"}
+{"level":"info","ts":"2023-10-16T21:44:53.190+0300","caller":"cmd/main.go:69","msg":"application initialized and started"}
+{"level":"info","ts":"2023-10-16T21:49:08.942+0300","caller":"cmd/main.go:42","msg":"bind application to host: localhost and port: :8282"}
+{"level":"info","ts":"2023-10-16T21:49:08.947+0300","caller":"cmd/main.go:69","msg":"application initialized and started"}
+{"level":"info","ts":"2023-10-16T21:52:29.730+0300","caller":"cmd/main.go:42","msg":"bind application to host: localhost and port: :8282"}
+{"level":"info","ts":"2023-10-16T21:52:29.736+0300","caller":"cmd/main.go:69","msg":"application initialized and started"}
+{"level":"info","ts":"2023-10-16T21:57:54.142+0300","caller":"cmd/main.go:42","msg":"bind application to host: localhost and port: :8282"}
+{"level":"info","ts":"2023-10-16T21:57:54.147+0300","caller":"cmd/main.go:69","msg":"application initialized and started"}
+{"level":"info","ts":"2023-10-16T21:58:56.560+0300","caller":"cmd/main.go:42","msg":"bind application to host: localhost and port: :8282"}
+{"level":"info","ts":"2023-10-16T21:58:56.565+0300","caller":"cmd/main.go:69","msg":"application initialized and started"}
+{"level":"info","ts":"2023-10-16T22:06:41.080+0300","caller":"cmd/main.go:42","msg":"bind application to host: localhost and port: :8282"}
+{"level":"info","ts":"2023-10-16T22:06:41.086+0300","caller":"cmd/main.go:69","msg":"application initialized and started"}
+{"level":"info","ts":"2023-10-16T22:21:46.486+0300","caller":"cmd/main.go:42","msg":"bind application to host: localhost and port: :8282"}
+{"level":"info","ts":"2023-10-16T22:21:46.492+0300","caller":"cmd/main.go:69","msg":"application initialized and started"}
+{"level":"info","ts":"2023-10-17T00:10:20.435+0300","caller":"cmd/main.go:42","msg":"bind application to host: localhost and port: :8282"}
+{"level":"info","ts":"2023-10-17T00:10:20.440+0300","caller":"cmd/main.go:69","msg":"application initialized and started"}
+{"level":"info","ts":"2023-10-17T00:45:52.364+0300","caller":"cmd/main.go:42","msg":"bind application to host: localhost and port: :8282"}
+{"level":"info","ts":"2023-10-17T00:45:52.369+0300","caller":"cmd/main.go:69","msg":"application initialized and started"}
+{"level":"info","ts":"2023-10-17T00:50:54.361+0300","caller":"cmd/main.go:42","msg":"bind application to host: localhost and port: :8282"}
+{"level":"info","ts":"2023-10-17T00:50:54.366+0300","caller":"cmd/main.go:69","msg":"application initialized and started"}
+{"level":"error","ts":"2023-10-17T00:51:13.932+0300","caller":"common/common.go:12","msg":"Unauthorized access"}
+{"level":"info","ts":"2023-10-17T00:52:01.313+0300","caller":"cmd/main.go:42","msg":"bind application to host: localhost and port: :8282"}
+{"level":"info","ts":"2023-10-17T00:52:01.317+0300","caller":"cmd/main.go:69","msg":"application initialized and started"}
+{"level":"error","ts":"2023-10-17T00:52:06.127+0300","caller":"common/common.go:12","msg":"Unauthorized access"}

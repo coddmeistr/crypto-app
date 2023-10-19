@@ -1,7 +1,6 @@
 package rest
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -32,18 +31,7 @@ func (c *BaseClient) SendRequest(req *http.Request) (*APIResponse, error) {
 	}
 
 	apiResponse := APIResponse{
-		IsOk:     true,
 		response: response,
-	}
-	if response.StatusCode < http.StatusOK || response.StatusCode >= http.StatusBadRequest {
-		apiResponse.IsOk = false
-		// if an error, read body so close it
-		defer response.Body.Close()
-
-		var apiErr APIError
-		if err = json.NewDecoder(response.Body).Decode(&apiErr); err == nil {
-			apiResponse.Error = apiErr
-		}
 	}
 
 	return &apiResponse, nil

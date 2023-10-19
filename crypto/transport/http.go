@@ -23,9 +23,11 @@ func NewHTTPServer(eps endpoints.CryptoEndpoint) *gin.Engine {
 
 	v1 := router.Group("v1")
 	{
-		accountGroup := v1.Group("crypto")
+		cryptoGroup := v1.Group("crypto")
 		{
-			accountGroup.GET("/:slug", eps.GetQuote)
+			cryptoGroup.GET("/prices", eps.GetPrices)
+			cryptoGroup.GET("/history", eps.GetHistory)
+			cryptoGroup.GET("/diff", eps.GetPriceDifference)
 		}
 	}
 

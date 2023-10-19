@@ -3,8 +3,6 @@ package coinmarket
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
-	"io"
 	"net/http"
 	"net/url"
 	"path"
@@ -16,7 +14,7 @@ const (
 )
 
 type ICoinMarket interface {
-	GetLatestQuotes(slug string) (USD, error)
+	GetLatestQuotes(slug string) (*USD, error)
 }
 
 type CoinMarket struct {
@@ -31,10 +29,10 @@ func NewCoinMarket(key string) ICoinMarket {
 	}
 }
 
-func (c *CoinMarket) GetLatestQuotes(slug string) (USD, error) {
+func (c *CoinMarket) GetLatestQuotes(slug string) (*USD, error) {
 	url, err := url.ParseRequestURI(host)
 	if err != nil {
-		return USD{}, err
+		return nil, err
 	}
 	url.Path = path.Join(url.Path, quotesURL)
 
@@ -44,26 +42,23 @@ func (c *CoinMarket) GetLatestQuotes(slug string) (USD, error) {
 
 	req, err := http.NewRequest(http.MethodGet, url.String(), nil)
 	if err != nil {
-		return USD{}, err
+		return nil, err
 	}
 	req.Header.Add("X-CMC_PRO_API_KEY", c.apikey)
 
 	resp, err := c.client.Do(req)
 	if err != nil {
-		return USD{}, err
+		return nil, err
 	}
 
-	b, err := io.ReadAll(resp.Body)
-	fmt.Println(string(b))
-
 	if resp.StatusCode != http.StatusOK {
-		return USD{}, errors.New("Something is not ok")
+		return nil, errors.New("Something is not ok")
 	}
 
 	var r QuotesResponse
 	if err := json.NewDecoder(resp.Body).Decode(&r); err != nil {
-		return USD{}, err
+		return nil, err
 	}
 
-	return USD{}, nil
+	return nil, nil
 }

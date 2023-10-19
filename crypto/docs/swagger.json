@@ -15,18 +15,39 @@
     },
     "basePath": "/v1/crypto",
     "paths": {
-        "/{id}": {
+        "/history": {
             "get": {
                 "produces": [
                     "application/json"
                 ],
-                "summary": "Retrieves account based on given ID",
+                "summary": "Retrieves OHLCV info based on timebase, symbol, convert currency symbol",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Timebase to get OHLCV data: days, hours, minutes",
+                        "name": "timebase",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Main crypto symbol that you'll get OHLCV for: BTC",
+                        "name": "symbol",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Price'd be converted to this currency symbol param",
+                        "name": "symbolTo",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
                         "type": "integer",
-                        "description": "Currency ID",
-                        "name": "id",
-                        "in": "path",
+                        "description": "IMPORTANT: number of records you'll get",
+                        "name": "limit",
+                        "in": "query",
                         "required": true
                     }
                 ],
@@ -34,7 +55,39 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.Currency"
+                            "$ref": "#/definitions/crypto_compare_sdk.HistoricalData"
+                        }
+                    }
+                }
+            }
+        },
+        "/prices": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Gets prices in choosen currencys for one crypto symbol",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Crypto symbol: BTC",
+                        "name": "symbol",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "All listed currencys which you want to see price for symbol",
+                        "name": "symbolsTo",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/crypto_compare_sdk.Prices"
                         }
                     }
                 }
@@ -42,38 +95,57 @@
         }
     },
     "definitions": {
-        "gorm.DeletedAt": {
+        "crypto_compare_sdk.HistoricalData": {
             "type": "object",
             "properties": {
-                "time": {
-                    "type": "string"
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/crypto_compare_sdk.OHLCVItem"
+                    }
                 },
-                "valid": {
-                    "description": "Valid is true if Time is not NULL",
-                    "type": "boolean"
+                "timeFrom": {
+                    "type": "integer"
+                },
+                "timeTo": {
+                    "type": "integer"
                 }
             }
         },
-        "models.Currency": {
+        "crypto_compare_sdk.OHLCVItem": {
             "type": "object",
             "properties": {
-                "createdAt": {
-                    "type": "string"
-                },
-                "deletedAt": {
-                    "$ref": "#/definitions/gorm.DeletedAt"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "tousd": {
+                "close": {
                     "type": "number"
                 },
-                "updatedAt": {
-                    "type": "string"
+                "high": {
+                    "type": "number"
+                },
+                "low": {
+                    "type": "number"
+                },
+                "open": {
+                    "type": "number"
+                },
+                "time": {
+                    "type": "integer"
+                },
+                "volumeFrom": {
+                    "type": "number"
+                },
+                "volumeTo": {
+                    "type": "number"
+                }
+            }
+        },
+        "crypto_compare_sdk.Prices": {
+            "type": "object",
+            "properties": {
+                "prices": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "number"
+                    }
                 }
             }
         }

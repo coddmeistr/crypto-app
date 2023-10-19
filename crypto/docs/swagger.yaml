@@ -1,27 +1,39 @@
 basePath: /v1/crypto
 definitions:
-  gorm.DeletedAt:
+  crypto_compare_sdk.HistoricalData:
     properties:
-      time:
-        type: string
-      valid:
-        description: Valid is true if Time is not NULL
-        type: boolean
-    type: object
-  models.Currency:
-    properties:
-      createdAt:
-        type: string
-      deletedAt:
-        $ref: '#/definitions/gorm.DeletedAt'
-      id:
+      data:
+        items:
+          $ref: '#/definitions/crypto_compare_sdk.OHLCVItem'
+        type: array
+      timeFrom:
         type: integer
-      name:
-        type: string
-      tousd:
+      timeTo:
+        type: integer
+    type: object
+  crypto_compare_sdk.OHLCVItem:
+    properties:
+      close:
         type: number
-      updatedAt:
-        type: string
+      high:
+        type: number
+      low:
+        type: number
+      open:
+        type: number
+      time:
+        type: integer
+      volumeFrom:
+        type: number
+      volumeTo:
+        type: number
+    type: object
+  crypto_compare_sdk.Prices:
+    properties:
+      prices:
+        additionalProperties:
+          type: number
+        type: object
     type: object
 info:
   contact:
@@ -34,12 +46,27 @@ info:
   title: Crypto Service API
   version: "1.0"
 paths:
-  /{id}:
+  /history:
     get:
       parameters:
-      - description: Currency ID
-        in: path
-        name: id
+      - description: 'Timebase to get OHLCV data: days, hours, minutes'
+        in: query
+        name: timebase
+        required: true
+        type: string
+      - description: 'Main crypto symbol that you''ll get OHLCV for: BTC'
+        in: query
+        name: symbol
+        required: true
+        type: string
+      - description: Price'd be converted to this currency symbol param
+        in: query
+        name: symbolTo
+        required: true
+        type: string
+      - description: 'IMPORTANT: number of records you''ll get'
+        in: query
+        name: limit
         required: true
         type: integer
       produces:
@@ -48,6 +75,27 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.Currency'
-      summary: Retrieves account based on given ID
+            $ref: '#/definitions/crypto_compare_sdk.HistoricalData'
+      summary: Retrieves OHLCV info based on timebase, symbol, convert currency symbol
+  /prices:
+    get:
+      parameters:
+      - description: 'Crypto symbol: BTC'
+        in: query
+        name: symbol
+        required: true
+        type: string
+      - description: All listed currencys which you want to see price for symbol
+        in: query
+        name: symbolsTo
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/crypto_compare_sdk.Prices'
+      summary: Gets prices in choosen currencys for one crypto symbol
 swagger: "2.0"

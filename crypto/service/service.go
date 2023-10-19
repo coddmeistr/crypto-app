@@ -1,22 +1,27 @@
 package service
 
 import (
-	coinmarket "github.com/maxim12233/crypto-app-server/crypto/coinmarketsdk"
+	"errors"
+
+	cryptocompare "github.com/maxim12233/crypto-app-server/crypto/crypto_compare_sdk"
+	"github.com/maxim12233/crypto-app-server/crypto/models"
 	"github.com/maxim12233/crypto-app-server/crypto/repository"
 	"go.uber.org/zap"
 )
 
 type ICryptoService interface {
-	GetQuote(slug string) (coinmarket.USD, error)
+	GetPrice(sym string, symsTo []string) (*cryptocompare.Prices, error)
+	GetHistory(timebase string, fsym string, tsym string, limit int) (*cryptocompare.HistoricalData, error)
+	GetPriceDifference(timebase string, symbol string, symbolTo string, offset int) (*models.PriceDifference, error)
 }
 
 type CryptoService struct {
 	repo   repository.IAccountRepository
-	market coinmarket.ICoinMarket
+	market cryptocompare.ICryptoCompare
 	logger *zap.Logger
 }
 
-func NewCryptoService(repo repository.IAccountRepository, logger *zap.Logger, market coinmarket.ICoinMarket) ICryptoService {
+func NewCryptoService(repo repository.IAccountRepository, logger *zap.Logger, market cryptocompare.ICryptoCompare) ICryptoService {
 	return CryptoService{
 		repo:   repo,
 		logger: logger,
@@ -24,11 +29,57 @@ func NewCryptoService(repo repository.IAccountRepository, logger *zap.Logger, ma
 	}
 }
 
-func (s CryptoService) GetQuote(slug string) (coinmarket.USD, error) {
+func (s CryptoService) GetPriceDifference(timebase string, symbol string, symbolTo string, offset int) (*models.PriceDifference, error) {
 
-	quote, err := s.market.GetLatestQuotes(slug)
+	latest, err := s.GetPrice(symbol, []string{symbolTo})
 	if err != nil {
-		return coinmarket.USD{}, err
+		return nil, err
 	}
-	return quote, nil
+
+	history, err := s.GetHistory(timebase, symbol, symbolTo, offset)
+	if err != nil {
+		return nil, err
+	}
+
+	if _, ok := latest.Prices[symbolTo]; !ok {
+		return nil, errors.New("Failed to get latest price according to given symbolTo. Map doesn't have symbolTo key")
+	}
+
+	latestPrice := latest.Prices[symbolTo]
+	historyPrice := (history.Data[0].High + history.Data[0].Low) / 2
+
+	return &models.PriceDifference{
+		Diff:         latestPrice - historyPrice,
+		DiffPercents: ((latestPrice - historyPrice) / historyPrice) * 100,
+	}, nil
+}
+
+func (s CryptoService) GetPrice(sym string, symsTo []string) (*cryptocompare.Prices, error) {
+
+	prices, err := s.market.GetLatestPrice(sym, symsTo)
+	if err != nil {
+		return nil, err
+	}
+	return prices, nil
+}
+
+func (s CryptoService) GetHistory(timebase string, fsym string, tsym string, limit int) (*cryptocompare.HistoricalData, error) {
+
+	var data *cryptocompare.HistoricalData
+	var err error
+	switch timebase {
+	case "days":
+		data, err = s.market.GetHistoricalDailyOHLCV(fsym, tsym, limit)
+	case "hours":
+		data, err = s.market.GetHistoricalHourlyOHLCV(fsym, tsym, limit)
+	case "minutes":
+		data, err = s.market.GetHistoricalMinutlyOHLCV(fsym, tsym, limit)
+	default:
+		return nil, errors.New("Invalid timebase param")
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	return data, nil
 }

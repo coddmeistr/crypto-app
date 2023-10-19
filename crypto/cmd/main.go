@@ -4,8 +4,8 @@ import (
 	"flag"
 	"fmt"
 
-	coinmarket "github.com/maxim12233/crypto-app-server/crypto/coinmarketsdk"
 	"github.com/maxim12233/crypto-app-server/crypto/config"
+	cryptocompare "github.com/maxim12233/crypto-app-server/crypto/crypto_compare_sdk"
 	"github.com/maxim12233/crypto-app-server/crypto/endpoints"
 	"github.com/maxim12233/crypto-app-server/crypto/repository"
 	"github.com/maxim12233/crypto-app-server/crypto/service"
@@ -43,7 +43,10 @@ func main() {
 
 	logger := config.InitializeLogger()
 
-	market := coinmarket.NewCoinMarket("7a8bbca0-8f16-434a-811c-bfe18bcc14fc")
+	market, err := cryptocompare.NewCryptoCompare("crypto-app", "8b0b296373b86403560d64ab9a1e29ae35ab088e87ef5745f554ef5d0a2673be")
+	if err != nil {
+		panic(fmt.Errorf("Fatal error market initialization: %s \n", err))
+	}
 	repo := repository.NewAccountRepository(dbSession, logger)
 	svc := service.NewCryptoService(repo, logger, market)
 	eps := endpoints.NewCryptoEndpoint(svc)

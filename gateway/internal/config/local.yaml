@@ -16,3 +16,6 @@ auth:
 
 account_service:
   url: http://localhost:8080/v1
+
+crypto_service:
+  url: http://localhost:8181/v1/crypto

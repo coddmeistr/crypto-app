@@ -2,16 +2,16 @@ database:
   host: postgres://postgres:maxgold123@localhost:5432/postgres
 
 http:
-  session_domain: appdomain
-  secret: secret
+  session_domain: account
 
 server:
   port: :8080
-  appid: appid
-  key: secret_key
 
 env:
   mode: debug
-  
-auth:
-  cas: https://domain
+
+dependencies:
+  crypto_service:
+    host: "http://localhost:8181"
+    endpoints:
+      current_prices: "/v1/crypto/prices"

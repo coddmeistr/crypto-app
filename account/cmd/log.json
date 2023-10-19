@@ -1,0 +1,57 @@
+{"level":"error","ts":"2023-10-18T22:30:20.841+0300","caller":"repository/repo.go:82","msg":"Get balance error","error":"record not found"}
+{"level":"error","ts":"2023-10-18T22:30:20.842+0300","caller":"service/service.go:84","msg":"Error getting account balance","error":"Not found"}
+{"level":"error","ts":"2023-10-18T22:31:08.201+0300","caller":"repository/repo.go:82","msg":"Get balance error","error":"record not found"}
+{"level":"error","ts":"2023-10-18T22:31:08.201+0300","caller":"service/service.go:84","msg":"Error getting account balance","error":"Not found"}
+{"level":"error","ts":"2023-10-18T22:31:15.841+0300","caller":"repository/repo.go:139","msg":"Create account error","error":"ОШИБКА: повторяющееся значение ключа нарушает ограничение уникальности \"accounts_login_key\" (SQLSTATE 23505)"}
+{"level":"error","ts":"2023-10-18T22:31:15.841+0300","caller":"service/service.go:156","msg":"Error creating account","error":"Internal"}
+{"level":"error","ts":"2023-10-18T23:39:31.800+0300","caller":"repository/repo.go:82","msg":"Get balance error","error":"record not found"}
+{"level":"error","ts":"2023-10-18T23:39:31.801+0300","caller":"service/service.go:83","msg":"Error getting account balance","error":"Not found"}
+{"level":"error","ts":"2023-10-18T23:40:14.253+0300","caller":"service/service.go:109","msg":"Error passwords not match","error":"crypto/bcrypt: hashedPassword is not the hash of the given password"}
+{"level":"error","ts":"2023-10-18T23:41:43.257+0300","caller":"repository/repo.go:127","msg":"Get account by login error","error":"record not found"}
+{"level":"error","ts":"2023-10-18T23:41:43.257+0300","caller":"service/service.go:95","msg":"Error getting account by login","error":"Not found"}
+{"level":"error","ts":"2023-10-18T23:42:28.474+0300","caller":"repository/repo.go:127","msg":"Get account by login error","error":"record not found"}
+{"level":"error","ts":"2023-10-18T23:42:28.475+0300","caller":"service/service.go:95","msg":"Error getting account by login","error":"Not found"}
+{"level":"error","ts":"2023-10-18T23:43:19.950+0300","caller":"repository/repo.go:139","msg":"Create account error","error":"ОШИБКА: повторяющееся значение ключа нарушает ограничение уникальности \"accounts_login_key\" (SQLSTATE 23505)"}
+{"level":"error","ts":"2023-10-18T23:43:19.950+0300","caller":"service/service.go:155","msg":"Error creating account","error":"Internal"}
+{"level":"error","ts":"2023-10-18T23:44:06.849+0300","caller":"repository/repo.go:139","msg":"Create account error","error":"ОШИБКА: повторяющееся значение ключа нарушает ограничение уникальности \"accounts_email_key\" (SQLSTATE 23505)"}
+{"level":"error","ts":"2023-10-18T23:44:06.849+0300","caller":"service/service.go:155","msg":"Error creating account","error":"Internal"}
+{"level":"error","ts":"2023-10-18T23:54:40.355+0300","caller":"repository/repo.go:127","msg":"Get account by login error","error":"record not found"}
+{"level":"error","ts":"2023-10-18T23:54:40.355+0300","caller":"service/service.go:95","msg":"Error getting account by login","error":"Not found"}
+{"level":"error","ts":"2023-10-18T23:54:48.300+0300","caller":"service/service.go:109","msg":"Error passwords not match","error":"crypto/bcrypt: hashedPassword is not the hash of the given password"}
+{"level":"error","ts":"2023-10-18T23:56:04.174+0300","caller":"service/service.go:109","msg":"Error passwords not match","error":"crypto/bcrypt: hashedPassword is not the hash of the given password"}
+{"level":"error","ts":"2023-10-18T23:56:29.210+0300","caller":"repository/repo.go:112","msg":"Get account by email error","error":"record not found"}
+{"level":"error","ts":"2023-10-18T23:56:29.211+0300","caller":"service/service.go:100","msg":"Error getting account by email","error":"Not found"}
+{"level":"error","ts":"2023-10-18T23:56:34.926+0300","caller":"service/service.go:109","msg":"Error passwords not match","error":"crypto/bcrypt: hashedPassword is not the hash of the given password"}
+{"level":"error","ts":"2023-10-18T23:57:03.973+0300","caller":"repository/repo.go:127","msg":"Get account by login error","error":"record not found"}
+{"level":"error","ts":"2023-10-18T23:57:03.973+0300","caller":"service/service.go:95","msg":"Error getting account by login","error":"Not found"}
+{"level":"error","ts":"2023-10-18T23:57:14.532+0300","caller":"repository/repo.go:112","msg":"Get account by email error","error":"record not found"}
+{"level":"error","ts":"2023-10-18T23:57:14.532+0300","caller":"service/service.go:100","msg":"Error getting account by email","error":"Not found"}
+{"level":"error","ts":"2023-10-19T00:10:25.415+0300","caller":"repository/repo.go:127","msg":"Get account by login error","error":"record not found"}
+{"level":"error","ts":"2023-10-19T00:10:25.415+0300","caller":"service/service.go:95","msg":"Error getting account by login","error":"Not found"}
+{"level":"error","ts":"2023-10-19T00:15:51.813+0300","caller":"repository/repo.go:127","msg":"Get account by login error","error":"record not found"}
+{"level":"error","ts":"2023-10-19T00:15:51.814+0300","caller":"service/service.go:95","msg":"Error getting account by login","error":"Not found"}
+{"level":"error","ts":"2023-10-19T00:15:52.385+0300","caller":"repository/repo.go:127","msg":"Get account by login error","error":"record not found"}
+{"level":"error","ts":"2023-10-19T00:15:52.386+0300","caller":"service/service.go:95","msg":"Error getting account by login","error":"Not found"}
+{"level":"error","ts":"2023-10-19T00:16:15.057+0300","caller":"repository/repo.go:112","msg":"Get account by email error","error":"record not found"}
+{"level":"error","ts":"2023-10-19T00:16:15.058+0300","caller":"service/service.go:100","msg":"Error getting account by email","error":"Not found"}
+{"level":"error","ts":"2023-10-19T17:39:10.936+0300","caller":"repository/repo.go:82","msg":"Get balance error","error":"record not found"}
+{"level":"error","ts":"2023-10-19T17:39:10.936+0300","caller":"service/service.go:43","msg":"Error getting account balance","error":"Not found"}
+{"level":"error","ts":"2023-10-19T17:39:39.120+0300","caller":"repository/repo.go:82","msg":"Get balance error","error":"record not found"}
+{"level":"error","ts":"2023-10-19T17:39:39.120+0300","caller":"service/service.go:43","msg":"Error getting account balance","error":"Not found"}
+{"level":"error","ts":"2023-10-19T17:39:43.696+0300","caller":"repository/repo.go:82","msg":"Get balance error","error":"record not found"}
+{"level":"error","ts":"2023-10-19T17:39:43.696+0300","caller":"service/service.go:43","msg":"Error getting account balance","error":"Not found"}
+{"level":"error","ts":"2023-10-19T17:40:37.172+0300","caller":"service/service.go:77","msg":"Error while doing request to foreign api","error":"Get \"localhost:8181?symbol=BTC&symbolsTo=USD\": unsupported protocol scheme \"localhost\""}
+{"level":"error","ts":"2023-10-19T17:42:31.371+0300","caller":"service/service.go:78","msg":"Error while doing request to foreign api","error":"Get \"localhost:8181?symbol=BTC&symbolsTo=USD\": unsupported protocol scheme \"localhost\""}
+{"level":"error","ts":"2023-10-19T17:44:31.629+0300","caller":"service/service.go:78","msg":"Error while doing request to foreign api","error":"Get \"localhost:8181?symbol=BTC&symbolsTo=USD\": unsupported protocol scheme \"localhost\""}
+{"level":"error","ts":"2023-10-19T17:46:32.322+0300","caller":"service/service.go:78","msg":"Error while doing request to foreign api","error":"Get \"http://localhost:8181/v1/crypto/prices?symbol=BTC&symbolsTo=USD\": dial tcp [::1]:8181: connectex: No connection could be made because the target machine actively refused it."}
+{"level":"error","ts":"2023-10-19T17:53:02.225+0300","caller":"service/service.go:91","msg":"Final map dont contain USD key"}
+{"level":"error","ts":"2023-10-19T17:55:09.594+0300","caller":"service/service.go:93","msg":"Final map dont contain USD key"}
+{"level":"error","ts":"2023-10-19T17:59:50.691+0300","caller":"repository/repo.go:57","msg":"Get activity error","error":"record not found"}
+{"level":"error","ts":"2023-10-19T18:07:43.404+0300","caller":"repository/repo.go:57","msg":"Get activity error","error":"record not found"}
+{"level":"error","ts":"2023-10-19T18:08:59.101+0300","caller":"service/service.go:47","msg":"Error not enough account balance"}
+{"level":"error","ts":"2023-10-19T18:09:40.265+0300","caller":"service/service.go:47","msg":"Error not enough account balance"}
+{"level":"error","ts":"2023-10-19T18:09:41.811+0300","caller":"service/service.go:47","msg":"Error not enough account balance"}
+{"level":"error","ts":"2023-10-19T18:10:32.017+0300","caller":"service/service.go:77","msg":"Foreign api, got not 200 code response"}
+{"level":"error","ts":"2023-10-19T18:51:48.089+0300","caller":"service/service.go:53","msg":"Error not enough account balance"}
+{"level":"error","ts":"2023-10-19T18:51:59.046+0300","caller":"service/service.go:151","msg":"Error updating activity","error":"some error"}
+{"level":"error","ts":"2023-10-19T18:52:40.794+0300","caller":"service/service.go:151","msg":"Error updating activity","error":"some error"}

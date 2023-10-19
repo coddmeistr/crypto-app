@@ -13,7 +13,7 @@ func InitDB(dbUrl string) (*gorm.DB, error) {
 		return nil, err
 	}
 
-	err = db.AutoMigrate(&models.Account{})
+	err = db.AutoMigrate(&models.Account{}, &models.Balance{}, &models.Activity{})
 	if err != nil {
 		return nil, err
 	}

@@ -6,7 +6,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/maxim12233/crypto-app-server/gateway/internal/config"
 	account_handler "github.com/maxim12233/crypto-app-server/gateway/internal/handlers/account"
+	crypto_handler "github.com/maxim12233/crypto-app-server/gateway/internal/handlers/crypto"
 	account_service "github.com/maxim12233/crypto-app-server/gateway/internal/services/account"
+	crypto_service "github.com/maxim12233/crypto-app-server/gateway/internal/services/crypto"
 	"github.com/maxim12233/crypto-app-server/gateway/pkg/logger"
 	"github.com/maxim12233/crypto-app-server/gateway/pkg/metrics"
 	"github.com/spf13/viper"
@@ -24,7 +26,11 @@ func main() {
 	metricHandler := metrics.Metric{Logger: logger}
 	metricHandler.Register(router)
 
-	accountService := account_service.NewService(cfg.GetString("account_service.url"), "/account/:id", logger)
+	cryptoService := crypto_service.NewService(cfg.GetString("crypto_service.url"), logger)
+	cryptoHandler := crypto_handler.Handler{CryptoService: cryptoService, Logger: logger}
+	cryptoHandler.Register(router)
+
+	accountService := account_service.NewService(cfg.GetString("account_service.url"), logger)
 	accountHandler := account_handler.Handler{AccountService: accountService, Logger: logger}
 	accountHandler.Register(router)
 

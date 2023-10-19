@@ -1,12 +1,16 @@
 package coinmarket
 
-import "encoding/json"
+import (
+	"time"
+)
 
 type QuotesResponse struct {
-	DataOuter DataOuter
+	Status Status               `json:"status"`
+	X      map[string]DataInner `json:"data"`
 }
 
-type DataOuter struct {
+type Status struct {
+	Timestamp time.Time
 }
 
 type DataInner struct {
@@ -21,10 +25,4 @@ type Quote struct {
 
 type USD struct {
 	Price float64
-}
-
-type DynamicKeysAndData struct {
-	Key   string          // This will hold the dynamic key
-	Value json.RawMessage // This will hold the dynamic JSON data
-	Data  DataInner       `json:"-"` // This will be populated after further unmarshalling
 }

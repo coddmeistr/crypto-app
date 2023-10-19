@@ -6,12 +6,16 @@ import (
 )
 
 type CryptoEndpoint struct {
-	GetQuote gin.HandlerFunc
+	GetPrices          gin.HandlerFunc
+	GetHistory         gin.HandlerFunc
+	GetPriceDifference gin.HandlerFunc
 }
 
 func NewCryptoEndpoint(s service.ICryptoService) CryptoEndpoint {
 	eps := CryptoEndpoint{
-		GetQuote: MakeGetQuoteEndpoint(s),
+		GetPrices:          MakeGetPricesEndpoint(s),
+		GetHistory:         MakeGetHistoryEndpoint(s),
+		GetPriceDifference: MakeGetTimePeriodPriceDifferenceEndpoint(s),
 	}
 
 	return eps
