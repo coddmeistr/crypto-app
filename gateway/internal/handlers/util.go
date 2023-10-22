@@ -5,11 +5,12 @@ import (
 	"github.com/maxim12233/crypto-app-server/gateway/internal/models"
 )
 
-func WriteJSONResponse(c *gin.Context, httpcode int, payload any, err error) {
+func WriteJSONResponse(c *gin.Context, httpcode int, payload any, err *models.Error) {
 	var e *models.Error
 	if err != nil {
 		e = &models.Error{
-			Message: err.Error(),
+			Code:    err.Code,
+			Message: err.Message,
 		}
 	} else {
 		e = nil
@@ -18,6 +19,6 @@ func WriteJSONResponse(c *gin.Context, httpcode int, payload any, err error) {
 		HttpCode:  httpcode,
 		HaveError: err != nil,
 		Error:     e,
-		Payload:   payload,
+		Payload:   &payload,
 	})
 }

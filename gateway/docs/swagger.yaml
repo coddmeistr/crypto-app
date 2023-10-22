@@ -1,0 +1,337 @@
+basePath: /api
+definitions:
+  account_handler.GetAccountBalanceResponse:
+    properties:
+      account_id:
+        type: integer
+      usd:
+        type: number
+    type: object
+  account_handler.GetAccountResponse:
+    properties:
+      email:
+        type: string
+      id:
+        type: integer
+      login:
+        type: string
+    type: object
+  crypto_handler.HistoricalData:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/crypto_handler.OHLCVItem'
+        type: array
+      timeFrom:
+        type: integer
+      timeTo:
+        type: integer
+    type: object
+  crypto_handler.OHLCVItem:
+    properties:
+      close:
+        type: number
+      high:
+        type: number
+      low:
+        type: number
+      open:
+        type: number
+      time:
+        type: integer
+      volumeFrom:
+        type: number
+      volumeTo:
+        type: number
+    type: object
+  crypto_handler.PriceDifference:
+    properties:
+      diff:
+        type: number
+      percents:
+        type: number
+    type: object
+  crypto_handler.Prices:
+    properties:
+      prices:
+        additionalProperties:
+          type: number
+        type: object
+    type: object
+host: localhost:8282
+info:
+  contact:
+    email: euseew.maxim2015@yandex.ru
+    name: API Support
+  description: Swagger API for Golang Project Crypto Service.
+  license:
+    name: EUS
+  termsOfService: http://swagger.io/terms/
+  title: Crypto Service API
+  version: "1.0"
+paths:
+  /account:
+    post:
+      consumes:
+      - application/json
+      description: Creating new unique user's account
+      parameters:
+      - description: All required. Email must be valid
+        in: body
+        name: Account_Info
+        required: true
+        schema:
+          example: |-
+            login: NewUser
+            password: fsgdsfzg
+            email: euseew@yandex.ru
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: Creating new user account
+      tags:
+      - accounts
+  /account/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete user's account pernamently
+      parameters:
+      - description: User's account ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Delete existing account
+      tags:
+      - accounts
+    get:
+      consumes:
+      - application/json
+      description: Retrieves account basic info, based on given id
+      parameters:
+      - description: User's account ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/account_handler.GetAccountResponse'
+      security:
+      - BearerAuth: []
+      summary: Retrieve account info
+      tags:
+      - accounts
+  /account/{id}/activity:
+    post:
+      consumes:
+      - application/json
+      description: Buys crypto activity for user for his balance
+      parameters:
+      - description: User's account ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: All required
+        in: body
+        name: Buy_Info
+        required: true
+        schema:
+          example: |-
+            symbol: BTC
+            price: 1423
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Buy some crypto activity
+      tags:
+      - accounts
+  /account/{id}/balance:
+    get:
+      consumes:
+      - application/json
+      description: Get user's USD balance
+      parameters:
+      - description: User's account ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/account_handler.GetAccountBalanceResponse'
+      security:
+      - BearerAuth: []
+      summary: Get user's balance
+      tags:
+      - accounts
+  /account/login:
+    put:
+      consumes:
+      - application/json
+      description: |-
+        If OK, payload contains authorization token(default exparation is ONE HOUR)
+        Every endpoint which requires authorization must contain token string in Authorization header
+      parameters:
+      - description: Email required if login is empty and vice-versa
+        in: body
+        name: Login_Info
+        required: true
+        schema:
+          example: |-
+            login: SomeUser
+            password: fsgdsfzg
+            email: euseew@yandex.ru
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: Login user
+      tags:
+      - accounts
+  /crypto/diff:
+    get:
+      consumes:
+      - application/json
+      description: |-
+        Getting price difference in USD and % between current date and some historical date
+        Use query params to configure it right
+      parameters:
+      - description: 'Default: days. What time you want to track. All variants: days,
+          hours, minutes'
+        in: query
+        name: timebase
+        type: string
+      - description: 'Crypto currency symbol. Example: BTC'
+        in: query
+        name: symbol
+        required: true
+        type: string
+      - description: 'One default currency to convert crypto symbol to. Example: USD'
+        in: query
+        name: symbolTo
+        required: true
+        type: string
+      - description: 'Default: 1. Offset from current date. For example if timebase=days
+          and offset=3 you get price difference between current day and day that was
+          3 days ago'
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/crypto_handler.PriceDifference'
+      summary: Price difference
+      tags:
+      - crypto
+  /crypto/history:
+    get:
+      consumes:
+      - application/json
+      description: |-
+        Getting Open High Low Close Volume info about given symbol
+        Uses different timebases depends on timebase query param
+      parameters:
+      - description: 'What time you want to track. All variants: days, hours, minutes'
+        in: query
+        name: timebase
+        required: true
+        type: string
+      - description: 'Crypto currency symbol. Example: BTC'
+        in: query
+        name: symbol
+        required: true
+        type: string
+      - description: 'One default currency to convert crypto symbol to. Example: USD'
+        in: query
+        name: symbolTo
+        required: true
+        type: string
+      - description: 'How many records you want to get. For example: timebase=days
+          limit=5 means that you get 5 days history from current date'
+        in: query
+        name: limit
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/crypto_handler.HistoricalData'
+      summary: Get OHLCV history info
+      tags:
+      - crypto
+  /crypto/prices:
+    get:
+      consumes:
+      - application/json
+      description: |-
+        Retrieves latest prices in different currencies for given crypto symbol
+        Every field in Prices response object is your given "symbolsTo" value.
+      parameters:
+      - description: 'Crypto currency symbol. Example: BTC'
+        in: query
+        name: symbol
+        required: true
+        type: string
+      - description: 'One or many default currencies to convert crypto symbol to.
+          Example 1: USD | Example 2: USD,JPY'
+        in: query
+        name: symbolsTo
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/crypto_handler.Prices'
+      summary: Get latest prices
+      tags:
+      - crypto
+securityDefinitions:
+  BearerAuth:
+    type: basic
+swagger: "2.0"

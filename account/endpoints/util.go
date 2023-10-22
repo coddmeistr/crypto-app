@@ -40,6 +40,6 @@ func writeJSONResponse(c *gin.Context, httpcode int, payload any, err error) {
 		HttpCode:  httpcode,
 		HaveError: err != nil,
 		Error:     e,
-		Payload:   payload,
+		Payload:   &payload,
 	})
 }

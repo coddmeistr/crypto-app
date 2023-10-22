@@ -15,9 +15,8 @@ var (
 	ErrValidation            = errors.New("Invalid request body. Check the documentation to know about all required fields and their types")
 	ErrNotAllRequiredQueries = errors.New("Not all queries")
 
-	// Custom errors
-	ErrIncorrectLoginOrPassword = errors.New("Incorrect login or password")
-	ErrNotEnoughBalance         = errors.New("User's account has not enough balance to perform this operation")
+	// Export errors
+
 )
 
 var errorCodesMap = map[error]int{
@@ -26,9 +25,6 @@ var errorCodesMap = map[error]int{
 	ErrBadRequest:            400,
 	ErrValidation:            3,
 	ErrNotAllRequiredQueries: 5,
-
-	ErrIncorrectLoginOrPassword: 11,
-	ErrNotEnoughBalance:         12,
 }
 
 func WrapE(err error, msg string) error {

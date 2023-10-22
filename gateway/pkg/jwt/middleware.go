@@ -15,8 +15,8 @@ func AuthMiddleware(validRoles []uint) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		config := config.GetConfig()
 
-		tokenString, err := c.Cookie("access_token")
-		if tokenString == "0" || tokenString == "" || err != nil {
+		tokenString := c.GetHeader("Authorization")
+		if tokenString == "0" || tokenString == "" {
 			common.ReturnAnauthorized(c)
 			return
 		}

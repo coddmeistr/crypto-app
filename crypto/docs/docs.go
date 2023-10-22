@@ -22,37 +22,95 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/history": {
+        "/diff": {
             "get": {
+                "description": "Getting price difference in USD and % between current date and some historical date\nUse query params to configure it right",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
-                "summary": "Retrieves OHLCV info based on timebase, symbol, convert currency symbol",
+                "tags": [
+                    "crypto"
+                ],
+                "summary": "Price difference",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Timebase to get OHLCV data: days, hours, minutes",
+                        "description": "Default: days. What time you want to track. All variants: days, hours, minutes",
                         "name": "timebase",
-                        "in": "query",
-                        "required": true
+                        "in": "query"
                     },
                     {
                         "type": "string",
-                        "description": "Main crypto symbol that you'll get OHLCV for: BTC",
+                        "description": "Crypto currency symbol. Example: BTC",
                         "name": "symbol",
                         "in": "query",
                         "required": true
                     },
                     {
                         "type": "string",
-                        "description": "Price'd be converted to this currency symbol param",
+                        "description": "One default currency to convert crypto symbol to. Example: USD",
                         "name": "symbolTo",
                         "in": "query",
                         "required": true
                     },
                     {
                         "type": "integer",
-                        "description": "IMPORTANT: number of records you'll get",
+                        "description": "Default: 1. Offset from current date. For example if timebase=days and offset=3 you get price difference between current day and day that was 3 days ago",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.PriceDifference"
+                        }
+                    }
+                }
+            }
+        },
+        "/history": {
+            "get": {
+                "description": "Getting Open High Low Close Volume info about given symbol\nUses different timebases depends on timebase query param",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "crypto"
+                ],
+                "summary": "Get OHLCV history info",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "What time you want to track. All variants: days, hours, minutes",
+                        "name": "timebase",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Crypto currency symbol. Example: BTC",
+                        "name": "symbol",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "One default currency to convert crypto symbol to. Example: USD",
+                        "name": "symbolTo",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "How many records you want to get. For example: timebase=days limit=5 means that you get 5 days history from current date",
                         "name": "limit",
                         "in": "query",
                         "required": true
@@ -62,7 +120,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/crypto_compare_sdk.HistoricalData"
+                            "$ref": "#/definitions/cryptocompare.HistoricalData"
                         }
                     }
                 }
@@ -70,21 +128,28 @@ const docTemplate = `{
         },
         "/prices": {
             "get": {
+                "description": "Retrieves latest prices in different currencies for given crypto symbol\nEvery field in Prices response object is your given \"symbolsTo\" value.",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
-                "summary": "Gets prices in choosen currencys for one crypto symbol",
+                "tags": [
+                    "crypto"
+                ],
+                "summary": "Get latest prices",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Crypto symbol: BTC",
+                        "description": "Crypto currency symbol. Example: BTC",
                         "name": "symbol",
                         "in": "query",
                         "required": true
                     },
                     {
                         "type": "string",
-                        "description": "All listed currencys which you want to see price for symbol",
+                        "description": "One or many default currencies to convert crypto symbol to. Example 1: USD | Example 2: USD,JPY",
                         "name": "symbolsTo",
                         "in": "query",
                         "required": true
@@ -94,7 +159,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/crypto_compare_sdk.Prices"
+                            "$ref": "#/definitions/cryptocompare.Prices"
                         }
                     }
                 }
@@ -102,13 +167,13 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "crypto_compare_sdk.HistoricalData": {
+        "cryptocompare.HistoricalData": {
             "type": "object",
             "properties": {
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/crypto_compare_sdk.OHLCVItem"
+                        "$ref": "#/definitions/cryptocompare.OHLCVItem"
                     }
                 },
                 "timeFrom": {
@@ -119,7 +184,7 @@ const docTemplate = `{
                 }
             }
         },
-        "crypto_compare_sdk.OHLCVItem": {
+        "cryptocompare.OHLCVItem": {
             "type": "object",
             "properties": {
                 "close": {
@@ -145,7 +210,7 @@ const docTemplate = `{
                 }
             }
         },
-        "crypto_compare_sdk.Prices": {
+        "cryptocompare.Prices": {
             "type": "object",
             "properties": {
                 "prices": {
@@ -153,6 +218,17 @@ const docTemplate = `{
                     "additionalProperties": {
                         "type": "number"
                     }
+                }
+            }
+        },
+        "models.PriceDifference": {
+            "type": "object",
+            "properties": {
+                "diff": {
+                    "type": "number"
+                },
+                "percents": {
+                    "type": "number"
                 }
             }
         }

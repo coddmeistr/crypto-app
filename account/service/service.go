@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/url"
 	"path"
+	"strings"
 
 	app "github.com/maxim12233/crypto-app-server/account"
 	"github.com/maxim12233/crypto-app-server/account/config"
@@ -18,10 +19,12 @@ import (
 type IAccountService interface {
 	GetAccount(id uint) (*models.Account, error)
 	DeleteAccount(id uint) error
-	CreateAccount(a models.CreateAccountRequest) error
-	Login(data models.LoginRequest) (uint, error)
+	CreateAccount(login string, password string, email string) error
+	Login(login string, password string, email string) (uint, error)
 	GetBalance(id uint) (*models.Balance, error)
 	BuyActivity(id uint, symbol string, price float64) error
+	FakeDeposit(id uint, amount float64) error
+	GetActivities(id uint, symbols string) ([]models.Activity, error)
 }
 
 type AccountService struct {
@@ -34,6 +37,41 @@ func NewAccountService(repo repository.IAccountRepository, logger *zap.Logger) I
 		repo:   repo,
 		logger: logger,
 	}
+}
+
+func (s AccountService) GetActivities(id uint, symbols string) ([]models.Activity, error) {
+
+	var symbolsSlice []string
+	if symbols == "" {
+		symbolsSlice = make([]string, 0)
+	} else {
+		symbolsSlice = strings.Split(symbols, ",")
+	}
+	activities, err := s.repo.GetActivities([]uint{id}, symbolsSlice)
+	if err != nil {
+		return nil, err
+	}
+
+	return activities, nil
+}
+
+func (s AccountService) FakeDeposit(id uint, amount float64) error {
+	balance, err := s.repo.GetAccountBalance(id)
+	if err != nil {
+		s.logger.Error("Error getting account balance", zap.Error(err))
+		return err
+	}
+	if balance.USD == nil {
+		s.logger.Error("Balance.USD is nil. Critical error")
+		return app.ErrInternal
+	}
+	sum := *balance.USD + amount
+	balance.USD = &sum
+	if err := s.repo.UpdateAccountBalance(balance); err != nil {
+		s.logger.Error("Error when updating account balance", zap.Error(err))
+		return app.ErrInternal
+	}
+	return nil
 }
 
 func (s AccountService) BuyActivity(id uint, symbol string, price float64) error {
@@ -101,8 +139,22 @@ func (s AccountService) BuyActivity(id uint, symbol string, price float64) error
 	}
 
 	// Get the payload response struct
-	pricesMap := body.Payload.(map[string]interface{})
-	prices := pricesMap["Prices"].(map[string]interface{})
+	var payload interface{}
+	if body.Payload == nil {
+		s.logger.Error("Error, got an empty nil payload from crypto service", zap.Error(err))
+		return app.WrapE(app.ErrInternal, "Foreign server issue or internal problem")
+	}
+	payload = *body.Payload
+	pricesMap, ok := payload.(map[string]interface{})
+	if !ok {
+		s.logger.Error("Cannot cast payload to proper response type", zap.Error(err))
+		return app.WrapE(app.ErrInternal, "Foreign server issue or internal problem")
+	}
+	prices, ok := pricesMap["Prices"].(map[string]interface{})
+	if !ok {
+		s.logger.Error("Cannot cast payload to proper response type", zap.Error(err))
+		return app.WrapE(app.ErrInternal, "Foreign server issue or internal problem")
+	}
 
 	// Check if needed value exists
 	if _, ok := prices["USD"]; !ok {
@@ -166,17 +218,17 @@ func (s AccountService) GetBalance(accid uint) (*models.Balance, error) {
 	return balance, nil
 }
 
-func (s AccountService) Login(data models.LoginRequest) (uint, error) {
+func (s AccountService) Login(login string, password string, email string) (uint, error) {
 
 	var matchesAccount *models.Account
 	var err error
-	if data.Login != "" {
-		if matchesAccount, err = s.repo.GetAccountByLogin(data.Login); err != nil {
+	if login != "" {
+		if matchesAccount, err = s.repo.GetAccountByLogin(login); err != nil {
 			s.logger.Error("Error getting account by login", zap.Error(err))
 			return 0, err
 		}
-	} else if data.Email != "" {
-		if matchesAccount, err = s.repo.GetAccountByEmail(data.Email); err != nil {
+	} else if email != "" {
+		if matchesAccount, err = s.repo.GetAccountByEmail(email); err != nil {
 			s.logger.Error("Error getting account by email", zap.Error(err))
 			return 0, err
 		}
@@ -185,7 +237,7 @@ func (s AccountService) Login(data models.LoginRequest) (uint, error) {
 		return 0, app.WrapE(app.ErrBadRequest, "Empty login and email fields")
 	}
 
-	if err := bcrypt.CompareHashAndPassword([]byte(matchesAccount.PasswordHash), []byte(data.Password)); err != nil {
+	if err := bcrypt.CompareHashAndPassword([]byte(matchesAccount.PasswordHash), []byte(password)); err != nil {
 		s.logger.Error("Error passwords not match", zap.Error(err))
 		return 0, app.ErrIncorrectLoginOrPassword
 	}
@@ -211,8 +263,8 @@ func (s AccountService) DeleteAccount(id uint) error {
 	return nil
 }
 
-func (s AccountService) CreateAccount(a models.CreateAccountRequest) error {
-	hash, err := bcrypt.GenerateFromPassword([]byte(a.Password), 10)
+func (s AccountService) CreateAccount(login string, password string, email string) error {
+	hash, err := bcrypt.GenerateFromPassword([]byte(password), 10)
 	if err != nil {
 		s.logger.Error("Error while hashing the password", zap.Error(err))
 		return app.ErrInternal
@@ -222,8 +274,8 @@ func (s AccountService) CreateAccount(a models.CreateAccountRequest) error {
 		USD = float64(15000)
 	)
 	acc := models.Account{
-		Login:        a.Login,
-		Email:        a.Email,
+		Login:        login,
+		Email:        email,
 		PasswordHash: string(hash),
 		Balance: models.Balance{
 			USD: &USD,

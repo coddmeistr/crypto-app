@@ -11,7 +11,7 @@ import (
 	"github.com/maxim12233/crypto-app-server/account/transport"
 )
 
-// @title Crypto Service API
+// @title Account Service API
 // @version 1.0
 // @description Swagger API for Golang Project Crypto Service.
 // @termsOfService http://swagger.io/terms/
@@ -28,9 +28,13 @@ func main() {
 	flag.Parse()
 
 	if *isDocker {
-		config.Init("docker")
+		if err := config.Init("docker"); err != nil {
+			panic(err)
+		}
 	} else {
-		config.Init("local")
+		if err := config.Init("local"); err != nil {
+			panic(err)
+		}
 	}
 	c := config.GetConfig()
 

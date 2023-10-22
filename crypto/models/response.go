@@ -1,12 +1,13 @@
 package models
 
 type Response struct {
-	HttpCode  int
-	HaveError bool
+	HttpCode  int    `json:"httpCode"`
+	HaveError bool   `json:"haveError"`
 	Error     *Error `json:"error"`
-	Payload   any    `json:"payload"`
+	Payload   *any   `json:"payload"`
 }
 
 type Error struct {
-	Message string
+	Code    int    `json:"code"`
+	Message string `json:"message"`
 }

@@ -1,20 +1,16 @@
 package endpoints
 
 import (
-	"errors"
 	"fmt"
 	"net/url"
 
 	"github.com/gin-gonic/gin"
+	app "github.com/maxim12233/crypto-app-server/crypto"
 	"github.com/maxim12233/crypto-app-server/crypto/models"
 )
 
-var (
-	errInvalidParamType = errors.New("Invalid param type")
-)
-
 func notAllQueryError(notLeastedQueryName string) error {
-	return errors.New(fmt.Sprintf("Haven't got all required query params. First not leasted params with name: %s", notLeastedQueryName))
+	return app.WrapE(app.ErrNotAllRequiredQueries, fmt.Sprintf("Haven't got all required query params. First not leasted params with name: %s", notLeastedQueryName))
 }
 
 // Method checks all query params with "keys" names
@@ -33,6 +29,7 @@ func writeJSONResponse(c *gin.Context, httpcode int, payload any, err error) {
 	var e *models.Error
 	if err != nil {
 		e = &models.Error{
+			Code:    app.ErrorCode(err),
 			Message: err.Error(),
 		}
 	} else {
@@ -42,6 +39,6 @@ func writeJSONResponse(c *gin.Context, httpcode int, payload any, err error) {
 		HttpCode:  httpcode,
 		HaveError: err != nil,
 		Error:     e,
-		Payload:   payload,
+		Payload:   &payload,
 	})
 }

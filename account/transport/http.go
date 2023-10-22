@@ -28,14 +28,16 @@ func NewHTTPServer(eps endpoints.AccountEndpoint) *gin.Engine {
 		{
 			accountGroup.GET("/:id", eps.GetAccount)
 			accountGroup.DELETE("/:id", eps.DeleteAccount)
-			accountGroup.POST("/", eps.CreateAccount)
+			accountGroup.POST("", eps.CreateAccount)
 			accountGroup.GET("/login", eps.Login)
 
 			balance := accountGroup.Group("/:id/balance")
-			balance.GET("/", eps.GetBalance)
+			balance.GET("", eps.GetBalance)
+			balance.PUT("", eps.FakeDeposit)
 
 			activity := accountGroup.Group("/:id/activity")
-			activity.POST("/", eps.BuyActivity)
+			activity.POST("", eps.BuyActivity)
+			activity.GET("", eps.GetActivities)
 		}
 	}
 

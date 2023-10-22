@@ -1,17 +1,17 @@
 basePath: /v1/crypto
 definitions:
-  crypto_compare_sdk.HistoricalData:
+  cryptocompare.HistoricalData:
     properties:
       data:
         items:
-          $ref: '#/definitions/crypto_compare_sdk.OHLCVItem'
+          $ref: '#/definitions/cryptocompare.OHLCVItem'
         type: array
       timeFrom:
         type: integer
       timeTo:
         type: integer
     type: object
-  crypto_compare_sdk.OHLCVItem:
+  cryptocompare.OHLCVItem:
     properties:
       close:
         type: number
@@ -28,12 +28,19 @@ definitions:
       volumeTo:
         type: number
     type: object
-  crypto_compare_sdk.Prices:
+  cryptocompare.Prices:
     properties:
       prices:
         additionalProperties:
           type: number
         type: object
+    type: object
+  models.PriceDifference:
+    properties:
+      diff:
+        type: number
+      percents:
+        type: number
     type: object
 info:
   contact:
@@ -46,25 +53,70 @@ info:
   title: Crypto Service API
   version: "1.0"
 paths:
-  /history:
+  /diff:
     get:
+      consumes:
+      - application/json
+      description: |-
+        Getting price difference in USD and % between current date and some historical date
+        Use query params to configure it right
       parameters:
-      - description: 'Timebase to get OHLCV data: days, hours, minutes'
+      - description: 'Default: days. What time you want to track. All variants: days,
+          hours, minutes'
         in: query
         name: timebase
-        required: true
         type: string
-      - description: 'Main crypto symbol that you''ll get OHLCV for: BTC'
+      - description: 'Crypto currency symbol. Example: BTC'
         in: query
         name: symbol
         required: true
         type: string
-      - description: Price'd be converted to this currency symbol param
+      - description: 'One default currency to convert crypto symbol to. Example: USD'
         in: query
         name: symbolTo
         required: true
         type: string
-      - description: 'IMPORTANT: number of records you''ll get'
+      - description: 'Default: 1. Offset from current date. For example if timebase=days
+          and offset=3 you get price difference between current day and day that was
+          3 days ago'
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.PriceDifference'
+      summary: Price difference
+      tags:
+      - crypto
+  /history:
+    get:
+      consumes:
+      - application/json
+      description: |-
+        Getting Open High Low Close Volume info about given symbol
+        Uses different timebases depends on timebase query param
+      parameters:
+      - description: 'What time you want to track. All variants: days, hours, minutes'
+        in: query
+        name: timebase
+        required: true
+        type: string
+      - description: 'Crypto currency symbol. Example: BTC'
+        in: query
+        name: symbol
+        required: true
+        type: string
+      - description: 'One default currency to convert crypto symbol to. Example: USD'
+        in: query
+        name: symbolTo
+        required: true
+        type: string
+      - description: 'How many records you want to get. For example: timebase=days
+          limit=5 means that you get 5 days history from current date'
         in: query
         name: limit
         required: true
@@ -75,17 +127,25 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/crypto_compare_sdk.HistoricalData'
-      summary: Retrieves OHLCV info based on timebase, symbol, convert currency symbol
+            $ref: '#/definitions/cryptocompare.HistoricalData'
+      summary: Get OHLCV history info
+      tags:
+      - crypto
   /prices:
     get:
+      consumes:
+      - application/json
+      description: |-
+        Retrieves latest prices in different currencies for given crypto symbol
+        Every field in Prices response object is your given "symbolsTo" value.
       parameters:
-      - description: 'Crypto symbol: BTC'
+      - description: 'Crypto currency symbol. Example: BTC'
         in: query
         name: symbol
         required: true
         type: string
-      - description: All listed currencys which you want to see price for symbol
+      - description: 'One or many default currencies to convert crypto symbol to.
+          Example 1: USD | Example 2: USD,JPY'
         in: query
         name: symbolsTo
         required: true
@@ -96,6 +156,8 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/crypto_compare_sdk.Prices'
-      summary: Gets prices in choosen currencys for one crypto symbol
+            $ref: '#/definitions/cryptocompare.Prices'
+      summary: Get latest prices
+      tags:
+      - crypto
 swagger: "2.0"

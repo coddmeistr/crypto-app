@@ -29,7 +29,7 @@ func (h *helper) GenerateJWT(ID uint, roles []uint) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"sub":   ID,
 		"roles": roles,
-		"exp":   time.Now().Add(time.Hour * time.Duration(c.GetInt("auth.jwtexphours"))).Unix(),
+		"exp":   time.Now().Add(time.Second * time.Duration(c.GetInt("auth.jwtexpseconds"))).Unix(),
 	})
 
 	h.logger.Info("signing jwt token")

@@ -3,7 +3,6 @@ package repository
 import (
 	"fmt"
 
-	"github.com/maxim12233/crypto-app-server/crypto/models"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -16,7 +15,7 @@ func InitDB(dbUrl string) (*gorm.DB, error) {
 		return nil, err
 	}
 
-	err = db.AutoMigrate(&models.Currency{})
+	err = db.AutoMigrate()
 	if err != nil {
 		return nil, err
 	}

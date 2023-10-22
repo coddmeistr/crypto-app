@@ -1,8 +1,6 @@
 package config
 
 import (
-	"fmt"
-
 	"github.com/spf13/viper"
 )
 
@@ -10,7 +8,7 @@ var config *viper.Viper
 
 // Init is an exported method that takes the environment starts the viper
 // (external lib) and returns the configuration struct.
-func Init(env string) {
+func Init(env string) error {
 	var err error
 	v := viper.New()
 	v.SetConfigType("yaml")
@@ -21,10 +19,11 @@ func Init(env string) {
 	v.AddConfigPath("crypto/config/")
 	err = v.ReadInConfig()
 	if err != nil {
-		fmt.Println("panic", err)
+		return err
 	}
 
 	config = v
+	return nil
 }
 
 func GetConfig() *viper.Viper {

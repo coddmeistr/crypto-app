@@ -1,11 +1,9 @@
 package service
 
 import (
-	"errors"
-
+	app "github.com/maxim12233/crypto-app-server/crypto"
 	cryptocompare "github.com/maxim12233/crypto-app-server/crypto/crypto_compare_sdk"
 	"github.com/maxim12233/crypto-app-server/crypto/models"
-	"github.com/maxim12233/crypto-app-server/crypto/repository"
 	"go.uber.org/zap"
 )
 
@@ -16,14 +14,12 @@ type ICryptoService interface {
 }
 
 type CryptoService struct {
-	repo   repository.IAccountRepository
 	market cryptocompare.ICryptoCompare
 	logger *zap.Logger
 }
 
-func NewCryptoService(repo repository.IAccountRepository, logger *zap.Logger, market cryptocompare.ICryptoCompare) ICryptoService {
+func NewCryptoService(logger *zap.Logger, market cryptocompare.ICryptoCompare) ICryptoService {
 	return CryptoService{
-		repo:   repo,
 		logger: logger,
 		market: market,
 	}
@@ -33,16 +29,19 @@ func (s CryptoService) GetPriceDifference(timebase string, symbol string, symbol
 
 	latest, err := s.GetPrice(symbol, []string{symbolTo})
 	if err != nil {
-		return nil, err
+		s.logger.Error("Error while getting prices from foreign api", zap.Error(err))
+		return nil, app.WrapE(app.ErrInternal, "Foreign API Error")
 	}
 
 	history, err := s.GetHistory(timebase, symbol, symbolTo, offset)
 	if err != nil {
-		return nil, err
+		s.logger.Error("Error while getting history from foreign api", zap.Error(err))
+		return nil, app.WrapE(app.ErrInternal, "Foreign API Error")
 	}
 
 	if _, ok := latest.Prices[symbolTo]; !ok {
-		return nil, errors.New("Failed to get latest price according to given symbolTo. Map doesn't have symbolTo key")
+		s.logger.Error("Foreign api response doesn't have required map key")
+		return nil, app.WrapE(app.ErrInternal, "Foreign API Error")
 	}
 
 	latestPrice := latest.Prices[symbolTo]
@@ -58,7 +57,8 @@ func (s CryptoService) GetPrice(sym string, symsTo []string) (*cryptocompare.Pri
 
 	prices, err := s.market.GetLatestPrice(sym, symsTo)
 	if err != nil {
-		return nil, err
+		s.logger.Error("Error while getting price from foreign api", zap.Error(err))
+		return nil, app.WrapE(app.ErrInternal, "Foreign API Error")
 	}
 	return prices, nil
 }
@@ -75,10 +75,12 @@ func (s CryptoService) GetHistory(timebase string, fsym string, tsym string, lim
 	case "minutes":
 		data, err = s.market.GetHistoricalMinutlyOHLCV(fsym, tsym, limit)
 	default:
-		return nil, errors.New("Invalid timebase param")
+		s.logger.Error("Given invalid timebase parameter")
+		return nil, app.WrapE(app.ErrBadRequest, "Invalid timebase for history")
 	}
 	if err != nil {
-		return nil, err
+		s.logger.Error("Error while getting history from foreign api", zap.Error(err))
+		return nil, app.WrapE(app.ErrInternal, "Foreign API Error")
 	}
 
 	return data, nil

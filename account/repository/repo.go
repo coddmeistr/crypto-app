@@ -20,6 +20,7 @@ type IAccountRepository interface {
 	UpdateActivity(act *models.Activity) error
 	GetActivity(accid uint, symbol string) (*models.Activity, error)
 	CreateActivity(act *models.Activity) error
+	GetActivities(accids []uint, symbols []string) ([]models.Activity, error)
 }
 
 type AccountRepository struct {
@@ -32,6 +33,30 @@ func NewAccountRepository(db *gorm.DB, logger *zap.Logger) IAccountRepository {
 		db:     db,
 		logger: logger,
 	}
+}
+
+func (r *AccountRepository) GetActivities(accids []uint, symbols []string) ([]models.Activity, error) {
+	var activities []models.Activity
+	var result *gorm.DB
+	if len(accids) == 0 && len(symbols) == 0 {
+		result = r.db.Find(&activities)
+	} else if len(accids) == 0 {
+		result = r.db.Where("symbo IN ?", symbols).Find(&activities)
+	} else if len(symbols) == 0 {
+		result = r.db.Where("account_id IN ?", accids).Find(&activities)
+	} else {
+		result = r.db.Where("(account_id IN ?) AND (symbol IN ?)", accids, symbols).Find(&activities)
+	}
+	if result.Error != nil {
+		if result.Error == gorm.ErrRecordNotFound {
+			r.logger.Error("Get activities not found", zap.Error(result.Error))
+			return nil, app.ErrNotFound
+		}
+		r.logger.Error("Get activities error", zap.Error(result.Error))
+		return nil, app.ErrInternal
+	}
+
+	return activities, nil
 }
 
 func (r *AccountRepository) UpdateActivity(act *models.Activity) error {

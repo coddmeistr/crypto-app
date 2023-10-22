@@ -2,16 +2,13 @@ database:
   host: postgres://admin:root@postgres:5432/database
 
 http:
-  session_domain: appdomain
-  secret: secret
+  session_domain: crypto
 
 server:
   port: :8181
-  appid: appid
-  key: secret_key
 
 env:
   mode: debug
-  
-auth:
-  cas: https://domain
+
+crypto_compare:
+  app_name: crypto-app

@@ -1,0 +1,486 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "Swagger API for Golang Project Crypto Service.",
+        "title": "Crypto Service API",
+        "termsOfService": "http://swagger.io/terms/",
+        "contact": {
+            "name": "API Support",
+            "email": "euseew.maxim2015@yandex.ru"
+        },
+        "license": {
+            "name": "EUS"
+        },
+        "version": "1.0"
+    },
+    "host": "localhost:8282",
+    "basePath": "/api",
+    "paths": {
+        "/account": {
+            "post": {
+                "description": "Creating new unique user's account",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "accounts"
+                ],
+                "summary": "Creating new user account",
+                "parameters": [
+                    {
+                        "description": "All required. Email must be valid",
+                        "name": "Account_Info",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "login: NewUser\npassword: fsgdsfzg\nemail: euseew@yandex.ru"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/account/login": {
+            "put": {
+                "description": "If OK, payload contains authorization token(default exparation is ONE HOUR)\nEvery endpoint which requires authorization must contain token string in Authorization header",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "accounts"
+                ],
+                "summary": "Login user",
+                "parameters": [
+                    {
+                        "description": "Email required if login is empty and vice-versa",
+                        "name": "Login_Info",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "login: SomeUser\npassword: fsgdsfzg\nemail: euseew@yandex.ru"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/account/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieves account basic info, based on given id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "accounts"
+                ],
+                "summary": "Retrieve account info",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User's account ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/account_handler.GetAccountResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Delete user's account pernamently",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "accounts"
+                ],
+                "summary": "Delete existing account",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User's account ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/account/{id}/activity": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Buys crypto activity for user for his balance",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "accounts"
+                ],
+                "summary": "Buy some crypto activity",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User's account ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "All required",
+                        "name": "Buy_Info",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "symbol: BTC\nprice: 1423"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/account/{id}/balance": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get user's USD balance",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "accounts"
+                ],
+                "summary": "Get user's balance",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User's account ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/account_handler.GetAccountBalanceResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/crypto/diff": {
+            "get": {
+                "description": "Getting price difference in USD and % between current date and some historical date\nUse query params to configure it right",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "crypto"
+                ],
+                "summary": "Price difference",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Default: days. What time you want to track. All variants: days, hours, minutes",
+                        "name": "timebase",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Crypto currency symbol. Example: BTC",
+                        "name": "symbol",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "One default currency to convert crypto symbol to. Example: USD",
+                        "name": "symbolTo",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Default: 1. Offset from current date. For example if timebase=days and offset=3 you get price difference between current day and day that was 3 days ago",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/crypto_handler.PriceDifference"
+                        }
+                    }
+                }
+            }
+        },
+        "/crypto/history": {
+            "get": {
+                "description": "Getting Open High Low Close Volume info about given symbol\nUses different timebases depends on timebase query param",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "crypto"
+                ],
+                "summary": "Get OHLCV history info",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "What time you want to track. All variants: days, hours, minutes",
+                        "name": "timebase",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Crypto currency symbol. Example: BTC",
+                        "name": "symbol",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "One default currency to convert crypto symbol to. Example: USD",
+                        "name": "symbolTo",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "How many records you want to get. For example: timebase=days limit=5 means that you get 5 days history from current date",
+                        "name": "limit",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/crypto_handler.HistoricalData"
+                        }
+                    }
+                }
+            }
+        },
+        "/crypto/prices": {
+            "get": {
+                "description": "Retrieves latest prices in different currencies for given crypto symbol\nEvery field in Prices response object is your given \"symbolsTo\" value.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "crypto"
+                ],
+                "summary": "Get latest prices",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Crypto currency symbol. Example: BTC",
+                        "name": "symbol",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "One or many default currencies to convert crypto symbol to. Example 1: USD | Example 2: USD,JPY",
+                        "name": "symbolsTo",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/crypto_handler.Prices"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "account_handler.GetAccountBalanceResponse": {
+            "type": "object",
+            "properties": {
+                "account_id": {
+                    "type": "integer"
+                },
+                "usd": {
+                    "type": "number"
+                }
+            }
+        },
+        "account_handler.GetAccountResponse": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "login": {
+                    "type": "string"
+                }
+            }
+        },
+        "crypto_handler.HistoricalData": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/crypto_handler.OHLCVItem"
+                    }
+                },
+                "timeFrom": {
+                    "type": "integer"
+                },
+                "timeTo": {
+                    "type": "integer"
+                }
+            }
+        },
+        "crypto_handler.OHLCVItem": {
+            "type": "object",
+            "properties": {
+                "close": {
+                    "type": "number"
+                },
+                "high": {
+                    "type": "number"
+                },
+                "low": {
+                    "type": "number"
+                },
+                "open": {
+                    "type": "number"
+                },
+                "time": {
+                    "type": "integer"
+                },
+                "volumeFrom": {
+                    "type": "number"
+                },
+                "volumeTo": {
+                    "type": "number"
+                }
+            }
+        },
+        "crypto_handler.PriceDifference": {
+            "type": "object",
+            "properties": {
+                "diff": {
+                    "type": "number"
+                },
+                "percents": {
+                    "type": "number"
+                }
+            }
+        },
+        "crypto_handler.Prices": {
+            "type": "object",
+            "properties": {
+                "prices": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "number"
+                    }
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "BearerAuth": {
+            "type": "basic"
+        }
+    }
+}
