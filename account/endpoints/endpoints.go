@@ -234,6 +234,40 @@ func MakeGetUserActivitiesEndpoint(s service.IAccountService) gin.HandlerFunc {
 	}
 }
 
+func MakeSellActityEndpoint(s service.IAccountService) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		id, err := strconv.Atoi(c.Param("id"))
+		if err != nil {
+			writeJSONResponse(c, app.GetHTTPCodeFromError(app.ErrBadRequest), nil, app.WrapE(app.ErrBadRequest, "Couldn't parse 'id' path param"))
+			return
+		}
+
+		var body SellActivityRequest
+		if err := c.BindJSON(&body); err != nil {
+			writeJSONResponse(c, app.GetHTTPCodeFromError(app.ErrBadRequest), nil, app.WrapE(app.ErrBadRequest, "Couldn't parse json body"))
+			return
+		}
+
+		// Validation
+		v := validator.New()
+		if err = v.Struct(body); err != nil {
+			for _, err := range err.(validator.ValidationErrors) {
+				fmt.Println(err.Field(), err.Tag())
+			}
+			writeJSONResponse(c, app.GetHTTPCodeFromError(app.ErrValidation), nil, app.WrapE(app.ErrValidation, "Body contains invalid data"))
+			return
+		}
+
+		err = s.SellActivity(uint(id), body.Symbol, body.Price, body.Amount)
+		if err != nil {
+			writeJSONResponse(c, app.GetHTTPCodeFromError(err), nil, err)
+			return
+		}
+
+		writeJSONResponse(c, http.StatusOK, "Activity successfully selled.", nil)
+	}
+}
+
 // BuyActivity godoc
 // @Summary Buy some crypto activity
 // @Description Buys crypto activity for user for his balance

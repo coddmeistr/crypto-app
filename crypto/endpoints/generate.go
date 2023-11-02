@@ -9,6 +9,7 @@ type CryptoEndpoint struct {
 	GetPrices          gin.HandlerFunc
 	GetHistory         gin.HandlerFunc
 	GetPriceDifference gin.HandlerFunc
+	GetCandlesDataWs   gin.HandlerFunc
 }
 
 func NewCryptoEndpoint(s service.ICryptoService) CryptoEndpoint {
@@ -16,6 +17,7 @@ func NewCryptoEndpoint(s service.ICryptoService) CryptoEndpoint {
 		GetPrices:          MakeGetPricesEndpoint(s),
 		GetHistory:         MakeGetHistoryEndpoint(s),
 		GetPriceDifference: MakeGetTimePeriodPriceDifferenceEndpoint(s),
+		GetCandlesDataWs:   MakeGetCandlesDataWebsocketEndpoint(s),
 	}
 
 	return eps

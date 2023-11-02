@@ -1,9 +1,12 @@
 package crypto_handler
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 
 	app "github.com/maxim12233/crypto-app-server/gateway"
+	"github.com/maxim12233/crypto-app-server/gateway/internal/config"
 	"github.com/maxim12233/crypto-app-server/gateway/internal/handlers"
 	"github.com/maxim12233/crypto-app-server/gateway/internal/models"
 	crypto_service "github.com/maxim12233/crypto-app-server/gateway/internal/services/crypto"
@@ -15,6 +18,8 @@ const (
 	cryptoGetPricesURL     = "/api/crypto/prices"
 	cryptoGetHistoryURL    = "/api/crypto/history"
 	cryptoGetDifferenceURL = "/api/crypto/diff"
+
+	cryptoWebsocketConnectionURL = "/ws/connect"
 )
 
 type Handler struct {
@@ -26,6 +31,7 @@ func (h *Handler) Register(router *gin.Engine) {
 	router.GET(cryptoGetPricesURL, h.GetPrices)
 	router.GET(cryptoGetHistoryURL, h.GetHistory)
 	router.GET(cryptoGetDifferenceURL, h.GetDifference)
+	router.GET(cryptoWebsocketConnectionURL, h.EstablishWebsocketConnection)
 }
 
 // GetPrices godoc
@@ -108,4 +114,12 @@ func (h *Handler) GetDifference(c *gin.Context) {
 	}
 
 	handlers.WriteJSONResponse(c, result.HttpCode, result.Payload, nil)
+}
+
+func (h *Handler) EstablishWebsocketConnection(c *gin.Context) {
+	wsUrl := config.GetConfig().GetString("crypto_service.ws")
+
+	c.Header("Location", wsUrl)
+
+	handlers.WriteJSONResponse(c, http.StatusTemporaryRedirect, "Resource temporary moved to other URL", nil)
 }

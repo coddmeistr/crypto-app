@@ -20,6 +20,7 @@ const (
 	accountDeleteAccountURL     = "/api/account/:id"
 	accountGetAccountBalanceURL = "/api/account/:id/balance"
 	accountBuyActivityURL       = "/api/account/:id/activity"
+	accountSellActivityURL      = "/api/account/:id/activity"
 	accountLoginURL             = "/api/account/login"
 	accountFakeDepositURL       = "/api/account/:id/balance"
 	accountGetActivitiesURL     = "/api/account/:id/activity"
@@ -36,6 +37,7 @@ func (h *Handler) Register(router *gin.Engine) {
 	router.DELETE(accountDeleteAccountURL, jwt.AuthMiddleware([]uint{1}), h.DeleteAccount)
 	router.GET(accountGetAccountBalanceURL, jwt.AuthMiddleware([]uint{1}), h.GetAccountBalance)
 	router.POST(accountBuyActivityURL, jwt.AuthMiddleware([]uint{1}), h.BuyActivity)
+	router.DELETE(accountSellActivityURL, jwt.AuthMiddleware([]uint{1}), h.SellActivity)
 	router.PUT(accountLoginURL, h.Login)
 	router.PUT(accountFakeDepositURL, jwt.AuthMiddleware([]uint{1}), h.FakeDeposit)
 	router.GET(accountGetActivitiesURL, jwt.AuthMiddleware([]uint{1}), h.GetActivities)
@@ -159,6 +161,32 @@ func (h *Handler) DeleteAccount(c *gin.Context) {
 func (h *Handler) BuyActivity(c *gin.Context) {
 
 	result, err := h.AccountService.BuyActivity(c)
+	if err != nil {
+		handlers.WriteJSONResponse(c, app.GetHTTPCodeFromError(err), nil, &models.Error{Code: app.ErrorCode(err), Message: err.Error()})
+		return
+	}
+	if result.HaveError {
+		handlers.WriteJSONResponse(c, result.HttpCode, nil, result.Error)
+		return
+	}
+
+	handlers.WriteJSONResponse(c, result.HttpCode, result.Payload, nil)
+}
+
+// SellActivity godoc
+// @Summary Sell crypto activity
+// @Description Sells existing user's crypto activity
+// @Tags  accounts
+// @Accept  json
+// @Produce json
+// @Security BearerAuth
+// @Param id path int true "User's account ID"
+// @Param Buy_Info body string true "All required" SchemaExample(symbol: BTC\nprice: 1423)"
+// @Success 200 {object} string
+// @Router /account/{id}/activity [delete]
+func (h *Handler) SellActivity(c *gin.Context) {
+
+	result, err := h.AccountService.SellActivity(c)
 	if err != nil {
 		handlers.WriteJSONResponse(c, app.GetHTTPCodeFromError(err), nil, &models.Error{Code: app.ErrorCode(err), Message: err.Error()})
 		return

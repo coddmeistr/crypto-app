@@ -121,3 +121,9 @@ func MakeGetTimePeriodPriceDifferenceEndpoint(s service.ICryptoService) gin.Hand
 		writeJSONResponse(c, http.StatusOK, data, nil)
 	}
 }
+
+func MakeGetCandlesDataWebsocketEndpoint(s service.ICryptoService) gin.HandlerFunc {
+	return func(c *gin.Context) {
+
+	}
+}

@@ -2,6 +2,7 @@ package service
 
 import (
 	app "github.com/maxim12233/crypto-app-server/crypto"
+	bitfinex "github.com/maxim12233/crypto-app-server/crypto/bitfinex_sdk"
 	cryptocompare "github.com/maxim12233/crypto-app-server/crypto/crypto_compare_sdk"
 	"github.com/maxim12233/crypto-app-server/crypto/models"
 	"go.uber.org/zap"
@@ -14,14 +15,16 @@ type ICryptoService interface {
 }
 
 type CryptoService struct {
-	market cryptocompare.ICryptoCompare
-	logger *zap.Logger
+	market   cryptocompare.ICryptoCompare
+	wsmarket bitfinex.IBitfinex
+	logger   *zap.Logger
 }
 
-func NewCryptoService(logger *zap.Logger, market cryptocompare.ICryptoCompare) ICryptoService {
+func NewCryptoService(logger *zap.Logger, market cryptocompare.ICryptoCompare, wsmarket bitfinex.IBitfinex) ICryptoService {
 	return CryptoService{
-		logger: logger,
-		market: market,
+		logger:   logger,
+		market:   market,
+		wsmarket: wsmarket,
 	}
 }
 

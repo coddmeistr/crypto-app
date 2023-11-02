@@ -12,6 +12,7 @@ type AccountEndpoint struct {
 	Login         gin.HandlerFunc
 	GetBalance    gin.HandlerFunc
 	BuyActivity   gin.HandlerFunc
+	SellActivity  gin.HandlerFunc
 	FakeDeposit   gin.HandlerFunc
 	GetActivities gin.HandlerFunc
 }
@@ -24,6 +25,7 @@ func NewAccountEndpoint(s service.IAccountService) AccountEndpoint {
 		Login:         MakeLoginEndpoint(s),
 		GetBalance:    MakeGetAccountBalanceEndpoint(s),
 		BuyActivity:   MakeBuyActivityEndpoint(s),
+		SellActivity:  MakeSellActityEndpoint(s),
 		FakeDeposit:   MakeFakeDepositEndpoint(s),
 		GetActivities: MakeGetUserActivitiesEndpoint(s),
 	}

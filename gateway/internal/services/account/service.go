@@ -19,6 +19,7 @@ const (
 	deleteAccountResource     = "/:id"
 	getAccountBalanceResource = "/:id/balance"
 	buyActivityResource       = "/:id/activity"
+	sellActivityResource      = "/:id/activity"
 	loginResource             = "/login"
 	fakeDepositResource       = "/:id/balance"
 	getActivitiesResource     = "/:id/activity"
@@ -49,6 +50,7 @@ type IAccountService interface {
 	CreateAccount(ctx *gin.Context) (*models.Response, error)
 	GetAccountBalance(ctx *gin.Context) (*models.Response, error)
 	BuyActivity(ctx *gin.Context) (*models.Response, error)
+	SellActivity(ctx *gin.Context) (*models.Response, error)
 	Login(ctx *gin.Context) (*string, error)
 	FakeDeposit(ctx *gin.Context) (*models.Response, error)
 	GetActivities(ctx *gin.Context) (*models.Response, error)
@@ -286,6 +288,44 @@ func (c *client) BuyActivity(ctx *gin.Context) (*models.Response, error) {
 
 	// Build resource URL: it's basically baseURL + resourceURL
 	uri, err := c.base.BuildURL(buyActivityResource, nil, pathParams)
+	if err != nil {
+		c.logger.Error("Error while building url", zap.Error(err))
+		return nil, app.ErrInternal
+	}
+
+	// Change destination URL and copy query from incoming request
+	req := ctx.Request
+	err = rest.ChangeRequestURLWithQuery(req, uri)
+	if err != nil {
+		c.logger.Error("Error while copying query", zap.Error(err))
+		return nil, app.ErrInternal
+	}
+
+	apiresp, err := c.base.SendRequest(req)
+	if err != nil {
+		c.logger.Error("Error sending request", zap.Error(err))
+		return nil, app.WrapE(app.ErrInternal, "Error with some of the service")
+	}
+
+	// Decode gained response to a basic response structure
+	// It default struct for microservices in this application
+	var resp models.Response
+	if err = json.NewDecoder(apiresp.Response().Body).Decode(&resp); err != nil {
+		c.logger.Error("Error decoding json from response body", zap.Error(err))
+		return nil, app.WrapE(app.ErrInternal, "Error with some of the service")
+	}
+
+	return &resp, nil
+}
+
+func (c *client) SellActivity(ctx *gin.Context) (*models.Response, error) {
+
+	pathParams := rest.PathOptions{
+		"id": ctx.Param("id"),
+	}
+
+	// Build resource URL: it's basically baseURL + resourceURL
+	uri, err := c.base.BuildURL(sellActivityResource, nil, pathParams)
 	if err != nil {
 		c.logger.Error("Error while building url", zap.Error(err))
 		return nil, app.ErrInternal

@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
+	bitfinex "github.com/maxim12233/crypto-app-server/crypto/bitfinex_sdk"
 	"github.com/maxim12233/crypto-app-server/crypto/config"
 	cryptocompare "github.com/maxim12233/crypto-app-server/crypto/crypto_compare_sdk"
 	"github.com/maxim12233/crypto-app-server/crypto/endpoints"
@@ -25,7 +26,7 @@ import (
 
 // @BasePath /v1/crypto
 func main() {
-	if err := godotenv.Load(); err != nil {
+	if err := godotenv.Load(".env"); err != nil {
 		panic(fmt.Errorf("Fatal error environmental variables initialization: %s \n", err))
 	}
 
@@ -50,7 +51,12 @@ func main() {
 		panic(fmt.Errorf("Fatal error market initialization: %s \n", err))
 	}
 
-	svc := service.NewCryptoService(logger, market)
+	wsmarket, err := bitfinex.NewBitfinex()
+	if err != nil {
+		panic(fmt.Errorf("Fatal error wsmarket initialization: %s \n", err))
+	}
+
+	svc := service.NewCryptoService(logger, market, wsmarket)
 	eps := endpoints.NewCryptoEndpoint(svc)
 	transport.NewHttpHandler(eps)
 }

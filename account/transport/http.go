@@ -37,6 +37,7 @@ func NewHTTPServer(eps endpoints.AccountEndpoint) *gin.Engine {
 
 			activity := accountGroup.Group("/:id/activity")
 			activity.POST("", eps.BuyActivity)
+			activity.DELETE("", eps.SellActivity)
 			activity.GET("", eps.GetActivities)
 		}
 	}

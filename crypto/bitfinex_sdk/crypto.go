@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 
 	"github.com/gorilla/websocket"
 )
@@ -140,12 +141,25 @@ func (c *Bitfinex) SetRealOHLCVConnection(timebase string, symbol string) (<-cha
 		return nil, nil, err
 	}
 
+	// Main gourouting that handling messages
+	// When done channels gets some value then everything terminating
 	done := make(chan struct{})
 	write := make(chan ResponseOHLCVUpdate)
 	msgCount := 0
 	go func() {
-		defer socket.Close()
-		defer close(write)
+		defer func() {
+			err := socket.Close()
+			if err != nil {
+				log.Printf("error: %v", err)
+			}
+			close(write)
+			fmt.Println("Exiting bitfinex ohlcv main gouruting")
+		}()
+
+		/* Main loop, where everything is structured via select statement
+		   If getting done value, then terminating function
+		   If getting message via helping gouruting above, then
+		   handling this message and writing result to the write channel */
 		for {
 
 			// If reading from done channel, means that there are signal from the outside to terminate
@@ -153,70 +167,68 @@ func (c *Bitfinex) SetRealOHLCVConnection(timebase string, symbol string) (<-cha
 			case <-done:
 				return
 			default:
-			}
 
-			// Getting message
-			_, message, err := socket.ReadMessage()
-			if err != nil {
-				fmt.Println(err)
-				return
-			}
-
-			// Updates handler
-			if msgCount > 2 {
-
-				resp, err := readUpdateMessage(message)
+				_, message, err := socket.ReadMessage()
 				if err != nil {
-					fmt.Println(err)
-					return
-				}
-				if resp != nil {
-					write <- *resp
-				} else {
-					fmt.Println("Nil response, closing connection...")
 					return
 				}
 
-			} else if msgCount == 0 {
+				// Updates handler
+				if msgCount > 2 {
 
-				// Start messages handler
-				err := readInfoMessage(message)
-				if err != nil {
-					fmt.Println(err)
-					return
-				}
-				msgCount += 1
-
-			} else if msgCount == 1 {
-
-				// Status messages handler
-				resp, err := readStatusMessage(message)
-				if err != nil {
-					fmt.Println(err)
-					write <- ResponseOHLCVUpdate{
-						Status: "failed",
+					resp, err := readUpdateMessage(message)
+					if err != nil {
+						fmt.Println(err)
+						return
 					}
-					return
-				}
-				write <- *resp
-				msgCount += 1
+					if resp != nil {
+						write <- *resp
+					} else {
+						fmt.Println("Nil response, closing connection...")
+						return
+					}
 
-			} else if msgCount == 2 {
+				} else if msgCount == 0 {
 
-				// Snapshot messages handler
-				resp, err := readSnapshotMessage(message)
-				if err != nil {
-					fmt.Println(err)
-					return
-				}
-				if resp != nil {
+					// Start messages handler
+					err := readInfoMessage(message)
+					if err != nil {
+						fmt.Println(err)
+						return
+					}
+					msgCount += 1
+
+				} else if msgCount == 1 {
+
+					// Status messages handler
+					resp, err := readStatusMessage(message)
+					if err != nil {
+						fmt.Println(err)
+						write <- ResponseOHLCVUpdate{
+							Status: "failed",
+						}
+						return
+					}
 					write <- *resp
-				} else {
-					fmt.Println("Nil response, closing connection...")
-					return
-				}
-				msgCount += 1
+					msgCount += 1
 
+				} else if msgCount == 2 {
+
+					// Snapshot messages handler
+					resp, err := readSnapshotMessage(message)
+					if err != nil {
+						fmt.Println(err)
+						return
+					}
+					if resp != nil {
+						write <- *resp
+					} else {
+						fmt.Println("Nil response, closing connection...")
+						return
+					}
+					msgCount += 1
+
+				}
 			}
 		}
 	}()

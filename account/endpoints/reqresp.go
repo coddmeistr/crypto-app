@@ -1,8 +1,14 @@
 package endpoints
 
+type SellActivityRequest struct {
+	Symbol string  `json:"symbol" validate:"required"`
+	Price  float64 `json:"price" validate:"required_without=Amount,omitempty,gt=0"`
+	Amount float64 `json:"amount" validate:"required_without=Price,omitempty,gt=0"`
+}
+
 type BuyActivityRequest struct {
-	Symbol string  `validate:"required"`
-	Price  float64 `validate:"required,gt=0"`
+	Symbol string  `json:"symbol" validate:"required"`
+	Price  float64 `json:"price" validate:"required,gt=0"`
 }
 
 type GetAccountBalanceResponse struct {

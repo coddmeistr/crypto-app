@@ -19,6 +19,7 @@ type IAccountRepository interface {
 	UpdateAccountBalance(b *models.Balance) error
 	UpdateActivity(act *models.Activity) error
 	GetActivity(accid uint, symbol string) (*models.Activity, error)
+	DeleteActivity(accid uint, symbol string) error
 	CreateActivity(act *models.Activity) error
 	GetActivities(accids []uint, symbols []string) ([]models.Activity, error)
 }
@@ -71,6 +72,15 @@ func (r *AccountRepository) UpdateActivity(act *models.Activity) error {
 		return app.ErrInternal
 	}
 
+	return nil
+}
+
+func (r *AccountRepository) DeleteActivity(accid uint, symbol string) error {
+	result := r.db.Model(&models.Activity{}).Where("account_id = ? AND symbol = ?", accid, symbol).Delete(&models.Activity{})
+	if result.Error != nil {
+		r.logger.Error("Delete account error", zap.Error(result.Error))
+		return app.ErrInternal
+	}
 	return nil
 }
 

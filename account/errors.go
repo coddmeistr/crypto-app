@@ -18,6 +18,7 @@ var (
 	// Custom errors
 	ErrIncorrectLoginOrPassword = errors.New("Incorrect login or password")
 	ErrNotEnoughBalance         = errors.New("User's account has not enough balance to perform this operation")
+	ErrNotEnoughCurrency        = errors.New("User's account has not enough currency balance to perform this operation")
 )
 
 var errorCodesMap = map[error]int{
@@ -29,6 +30,7 @@ var errorCodesMap = map[error]int{
 
 	ErrIncorrectLoginOrPassword: 11,
 	ErrNotEnoughBalance:         12,
+	ErrNotEnoughCurrency:        13,
 }
 
 func WrapE(err error, msg string) error {

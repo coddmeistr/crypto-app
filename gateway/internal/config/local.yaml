@@ -16,3 +16,4 @@ account_service:
 
 crypto_service:
   url: http://localhost:8181/v1/crypto
+  ws:  http://localhost:8181/ws
