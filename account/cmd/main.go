@@ -27,18 +27,17 @@ func main() {
 	isDocker := flag.Bool("docker", false, "Defines if app runs with docker")
 	flag.Parse()
 
-	if *isDocker {
-		if err := config.Init("docker"); err != nil {
-			panic(err)
-		}
-	} else {
-		if err := config.Init("local"); err != nil {
-			panic(err)
-		}
+	if err := config.Init("local"); err != nil {
+		panic(err)
 	}
 	c := config.GetConfig()
 
-	dbUrl := c.GetString("database.host")
+	var dbUrl string
+	if *isDocker {
+		dbUrl = c.GetString("database.docker")
+	} else {
+		dbUrl = c.GetString("database.local")
+	}
 	dbSession, err := repository.InitDB(dbUrl)
 	if err != nil {
 		panic(fmt.Errorf("Fatal error database connection: %s \n", err))

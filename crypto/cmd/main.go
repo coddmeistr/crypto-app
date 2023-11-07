@@ -30,17 +30,11 @@ func main() {
 		panic(fmt.Errorf("Fatal error environmental variables initialization: %s \n", err))
 	}
 
-	isDocker := flag.Bool("docker", false, "Defines if app runs with docker")
+	_ = flag.Bool("docker", false, "Defines if app runs with docker")
 	flag.Parse()
 
-	if *isDocker {
-		if err := config.Init("docker"); err != nil {
-			panic(err)
-		}
-	} else {
-		if err := config.Init("local"); err != nil {
-			panic(err)
-		}
+	if err := config.Init("local"); err != nil {
+		panic(err)
 	}
 	c := config.GetConfig()
 

@@ -245,8 +245,6 @@ var SwaggerInfo = &swag.Spec{
 	Description:      "Swagger API for Golang Project Crypto Service.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
-	LeftDelim:        "{{",
-	RightDelim:       "}}",
 }
 
 func init() {

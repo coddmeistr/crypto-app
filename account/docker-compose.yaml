@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16.0
+    environment:
+      POSTGRES_DB: "testdb"
+      POSTGRES_PASSWORD: "testpass"
+      POSTGRES_USER: "testuser"
+    healthcheck:
+      test: 'pg_isready --username "testuser" --dbname "testdb"'
+      interval: 1s
+      retries: 3
+      timeout: 5s
+    volumes:
+      - fortestpostgres:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  migrate:
+    image: migrate/migrate:4
+    command: -source 'file:///migrations' -database 'postgres://localhost:5432/testdb' up
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - migrations:/migrations:ro
+
+volumes:
+  fortestpostgres:
+  migrations:

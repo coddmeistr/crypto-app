@@ -1,8 +1,5 @@
-database:
-  host: postgres://postgres:maxgold123@localhost:5432/postgres
-
 http:
-  session_domain: account
+  session_domain: crypto
 
 server:
   port: :8181

@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	app "github.com/maxim12233/crypto-app-server/account"
+	"github.com/maxim12233/crypto-app-server/account/config"
 	"github.com/maxim12233/crypto-app-server/account/service"
 )
 
@@ -61,8 +62,18 @@ func MakeCreateAccountEndpoint(s service.IAccountService) gin.HandlerFunc {
 			return
 		}
 
+		cfg := config.GetConfig()
+		var (
+			login_max_length    = cfg.GetInt("validation.login.max_length")
+			login_min_length    = cfg.GetInt("validation.login.min_length")
+			password_max_length = cfg.GetInt("validation.password.max_length")
+			password_min_length = cfg.GetInt("validation.password.min_length")
+		)
+
 		// Validation
 		v := validator.New()
+		v.RegisterValidation("password", makePasswordValidator(password_min_length, password_max_length))
+		v.RegisterValidation("login", makeLoginValidator(login_min_length, login_max_length))
 		if err := v.Struct(body); err != nil {
 			for _, err := range err.(validator.ValidationErrors) {
 				fmt.Println(err.Field(), err.Tag())
@@ -164,15 +175,50 @@ func MakeGetAccountBalanceEndpoint(s service.IAccountService) gin.HandlerFunc {
 			return
 		}
 
+		var fetchActivity bool
+		if c.Query("fetchActivity") == "" {
+			fetchActivity = false
+		} else {
+			fetchActivity, err = strconv.ParseBool(c.Query("fetchActivity"))
+			if err != nil {
+				writeJSONResponse(c, app.GetHTTPCodeFromError(app.ErrBadRequest), nil, app.WrapE(app.ErrBadRequest, "Couldn't parse bool query param with name: fetchActivity"))
+				return
+			}
+		}
+
 		bal, err := s.GetBalance(uint(id))
 		if err != nil {
 			writeJSONResponse(c, app.GetHTTPCodeFromError(err), nil, err)
 			return
 		}
 
+		if !fetchActivity {
+			writeJSONResponse(c, http.StatusOK, GetAccountBalanceResponse{
+				AccountID: bal.AccountID,
+				USD:       *bal.USD,
+			}, nil)
+			return
+		}
+
+		total := .0
+		activities, prices, err := s.GetActivities(uint(id), "", true)
+		if err != nil {
+			writeJSONResponse(c, app.GetHTTPCodeFromError(err), nil, err)
+			return
+		}
+		for _, v := range activities {
+			price, ok := prices[v.Symbol]
+			if !ok {
+				writeJSONResponse(c, app.GetHTTPCodeFromError(app.ErrInternal), nil, app.ErrInternal)
+				return
+			}
+			total += v.Amount * price
+		}
+
 		writeJSONResponse(c, http.StatusOK, GetAccountBalanceResponse{
-			AccountID: bal.AccountID,
-			USD:       *bal.USD,
+			AccountID:     bal.AccountID,
+			USD:           *bal.USD,
+			ActivityTotal: &total,
 		}, nil)
 	}
 }
@@ -215,15 +261,34 @@ func MakeGetUserActivitiesEndpoint(s service.IAccountService) gin.HandlerFunc {
 		}
 
 		symbols := c.Query("symbols")
+		var fetchPrices bool
+		if c.Query("fetchPrices") == "" {
+			fetchPrices = false
+		} else {
+			fetchPrices, err = strconv.ParseBool(c.Query("fetchPrices"))
+			if err != nil {
+				writeJSONResponse(c, app.GetHTTPCodeFromError(app.ErrBadRequest), nil, app.WrapE(app.ErrBadRequest, "Couldn't parse bool query param with name: fetchPrices"))
+				return
+			}
+		}
 
-		records, err := s.GetActivities(uint(id), symbols)
+		records, prices, err := s.GetActivities(uint(id), symbols, fetchPrices)
 		if err != nil {
 			writeJSONResponse(c, app.GetHTTPCodeFromError(err), nil, err)
 			return
 		}
 		var activities []ActivityResponse
 		for _, v := range records {
-			activities = append(activities, ActivityResponse{Symbol: v.Symbol, Amount: v.Amount})
+			if fetchPrices {
+				price, ok := prices[v.Symbol]
+				if !ok {
+					writeJSONResponse(c, app.GetHTTPCodeFromError(app.ErrInternal), nil, app.ErrInternal)
+					return
+				}
+				activities = append(activities, ActivityResponse{Symbol: v.Symbol, Amount: v.Amount, Price: &price})
+			} else {
+				activities = append(activities, ActivityResponse{Symbol: v.Symbol, Amount: v.Amount})
+			}
 		}
 		resp := GetActivitiesResponse{
 			AccountID:  uint(id),

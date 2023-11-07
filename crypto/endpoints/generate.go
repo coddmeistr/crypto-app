@@ -17,7 +17,6 @@ func NewCryptoEndpoint(s service.ICryptoService) CryptoEndpoint {
 		GetPrices:          MakeGetPricesEndpoint(s),
 		GetHistory:         MakeGetHistoryEndpoint(s),
 		GetPriceDifference: MakeGetTimePeriodPriceDifferenceEndpoint(s),
-		GetCandlesDataWs:   MakeGetCandlesDataWebsocketEndpoint(s),
 	}
 
 	return eps

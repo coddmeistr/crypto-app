@@ -12,13 +12,14 @@ type BuyActivityRequest struct {
 }
 
 type GetAccountBalanceResponse struct {
-	AccountID uint    `json:"account_id"`
-	USD       float64 `json:"usd"`
+	AccountID     uint     `json:"account_id"`
+	USD           float64  `json:"usd"`
+	ActivityTotal *float64 `json:"activityTotal,omitempty"`
 }
 
 type CreateAccountRequest struct {
-	Login    string `json:"login" validate:"required"`
-	Password string `json:"password" validate:"required"`
+	Login    string `json:"login" validate:"required,login"`
+	Password string `json:"password" validate:"required,password"`
 	Email    string `json:"email" validate:"required,email"`
 }
 
@@ -39,8 +40,9 @@ type GetAccountResponse struct {
 }
 
 type ActivityResponse struct {
-	Symbol string  `json:"symbol"`
-	Amount float64 `json:"amount"`
+	Symbol string   `json:"symbol"`
+	Amount float64  `json:"amount"`
+	Price  *float64 `json:"price,omitempty"`
 }
 type GetActivitiesResponse struct {
 	AccountID  uint               `json:"account_id"`

@@ -1,5 +1,6 @@
 database:
-  host: postgres://postgres:maxgold123@localhost:5432/postgres
+  docker: postgres://admin:root@postgres:5432/database
+  local: postgres://postgres:maxgold123@localhost:5432/postgres
 
 http:
   session_domain: account
@@ -9,6 +10,14 @@ server:
 
 env:
   mode: debug
+
+validation:
+  password:
+    min_length: 6
+    max_length: 20
+  login:
+    min_length: 6
+    max_length: 20
 
 dependencies:
   crypto_service:

@@ -1,15 +1,10 @@
 package service
 
 import (
-	"encoding/json"
 	"errors"
-	"net/http"
-	"net/url"
-	"path"
 	"strings"
 
 	app "github.com/maxim12233/crypto-app-server/account"
-	"github.com/maxim12233/crypto-app-server/account/config"
 	"github.com/maxim12233/crypto-app-server/account/models"
 	"github.com/maxim12233/crypto-app-server/account/repository"
 	"go.uber.org/zap"
@@ -25,7 +20,7 @@ type IAccountService interface {
 	BuyActivity(id uint, symbol string, price float64) error
 	SellActivity(id uint, symbol string, price float64, amount float64) error
 	FakeDeposit(id uint, amount float64) error
-	GetActivities(id uint, symbols string) ([]models.Activity, error)
+	GetActivities(id uint, symbols string, fetchPrices bool) ([]models.Activity, map[string]float64, error)
 	GetActivity(id uint, symbol string) (*models.Activity, error)
 }
 
@@ -41,7 +36,7 @@ func NewAccountService(repo repository.IAccountRepository, logger *zap.Logger) I
 	}
 }
 
-func (s AccountService) GetActivities(id uint, symbols string) ([]models.Activity, error) {
+func (s AccountService) GetActivities(id uint, symbols string, fetchPrices bool) ([]models.Activity, map[string]float64, error) {
 
 	var symbolsSlice []string
 	if symbols == "" {
@@ -51,10 +46,21 @@ func (s AccountService) GetActivities(id uint, symbols string) ([]models.Activit
 	}
 	activities, err := s.repo.GetActivities([]uint{id}, symbolsSlice)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return activities, nil
+	var prices = make(map[string]float64)
+	if fetchPrices {
+		for _, v := range activities {
+			price, err := fetchSymbolPriceFromCryptoMicroservice(v.Symbol, "USD", s.logger)
+			if err != nil {
+				return nil, nil, err
+			}
+			prices[v.Symbol] = price
+		}
+	}
+
+	return activities, prices, nil
 }
 
 func (s AccountService) GetActivity(id uint, symbol string) (*models.Activity, error) {
@@ -114,67 +120,10 @@ func (s AccountService) SellActivity(id uint, symbol string, price float64, amou
 		return nil
 	}
 
-	// Take the current price for symbol via asking crypto microservice
-	// Using config values to get host and path to foreign microservice
-	var currentSymbolPrice float64
-	host := config.GetConfig().GetString("dependencies.crypto_service.host")
-	resPath := config.GetConfig().GetString("dependencies.crypto_service.endpoints.current_prices")
-	uri, err := url.ParseRequestURI(host)
+	currentSymbolPrice, err := fetchSymbolPriceFromCryptoMicroservice(symbol, "USD", s.logger)
 	if err != nil {
-		s.logger.Error("Couldn't parse uri from the config host string", zap.Error(err))
-		return app.WrapE(app.ErrInternal, "Foreign server issue or internal problem")
+		return err
 	}
-	uri.Path = path.Join(uri.Path, resPath)
-	q := uri.Query()
-	q.Set("symbol", symbol)
-	q.Set("symbolsTo", "USD")
-	uri.RawQuery = q.Encode()
-	req, err := http.NewRequest(http.MethodGet, uri.String(), nil)
-	if err != nil {
-		s.logger.Error("Couldn't create new request to request crypto service", zap.Error(err))
-		return app.WrapE(app.ErrInternal, "Foreign server issue or internal problem")
-	}
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		s.logger.Error("Error while doing request to foreign api", zap.Error(err))
-		return app.WrapE(app.ErrInternal, "Foreign server issue or internal problem")
-	}
-	if resp.StatusCode != http.StatusOK {
-		s.logger.Error("Foreign api, got not 200 code response")
-		return app.WrapE(app.ErrInternal, "Foreign server issue or internal problem")
-	}
-	var body models.Response // Basic response model for all of this app's microservices and gateway
-	if err := json.NewDecoder(resp.Body).Decode(&body); err != nil {
-		s.logger.Error("Error while decoding json from crypto service response", zap.Error(err))
-		return app.WrapE(app.ErrInternal, "Foreign server issue or internal problem")
-	}
-
-	// Get the payload response struct
-	var payload interface{}
-	if body.Payload == nil {
-		s.logger.Error("Error, got an empty nil payload from crypto service", zap.Error(err))
-		return app.WrapE(app.ErrInternal, "Foreign server issue or internal problem")
-	}
-	payload = *body.Payload
-	pricesMap, ok := payload.(map[string]interface{})
-	if !ok {
-		s.logger.Error("Cannot cast payload to proper response type", zap.Error(err))
-		return app.WrapE(app.ErrInternal, "Foreign server issue or internal problem")
-	}
-	prices, ok := pricesMap["Prices"].(map[string]interface{})
-	if !ok {
-		s.logger.Error("Cannot cast payload to proper response type", zap.Error(err))
-		return app.WrapE(app.ErrInternal, "Foreign server issue or internal problem")
-	}
-
-	// Check if needed value exists
-	if _, ok := prices["USD"]; !ok {
-		s.logger.Error("Final map dont contain USD key")
-		return app.WrapE(app.ErrInternal, "Foreign server issue or internal problem")
-	}
-
-	// Get this value and try to covert to wanted type
-	currentSymbolPrice = prices["USD"].(float64)
 
 	// How much of crypto currency user sells(f.e. 1 BTC or 0.001 BTC)
 	var haveUSD float64
@@ -269,67 +218,10 @@ func (s AccountService) BuyActivity(id uint, symbol string, price float64) error
 		return nil
 	}
 
-	// Take the current price for symbol via asking crypto microservice
-	// Using config values to get host and path to foreign microservice
-	var currentSymbolPrice float64
-	host := config.GetConfig().GetString("dependencies.crypto_service.host")
-	resPath := config.GetConfig().GetString("dependencies.crypto_service.endpoints.current_prices")
-	uri, err := url.ParseRequestURI(host)
+	currentSymbolPrice, err := fetchSymbolPriceFromCryptoMicroservice(symbol, "USD", s.logger)
 	if err != nil {
-		s.logger.Error("Couldn't parse uri from the config host string", zap.Error(err))
-		return app.WrapE(app.ErrInternal, "Foreign server issue or internal problem")
+		return err
 	}
-	uri.Path = path.Join(uri.Path, resPath)
-	q := uri.Query()
-	q.Set("symbol", symbol)
-	q.Set("symbolsTo", "USD")
-	uri.RawQuery = q.Encode()
-	req, err := http.NewRequest(http.MethodGet, uri.String(), nil)
-	if err != nil {
-		s.logger.Error("Couldn't create new request to request crypto service", zap.Error(err))
-		return app.WrapE(app.ErrInternal, "Foreign server issue or internal problem")
-	}
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		s.logger.Error("Error while doing request to foreign api", zap.Error(err))
-		return app.WrapE(app.ErrInternal, "Foreign server issue or internal problem")
-	}
-	if resp.StatusCode != http.StatusOK {
-		s.logger.Error("Foreign api, got not 200 code response")
-		return app.WrapE(app.ErrInternal, "Foreign server issue or internal problem")
-	}
-	var body models.Response // Basic response model for all of this app's microservices and gateway
-	if err := json.NewDecoder(resp.Body).Decode(&body); err != nil {
-		s.logger.Error("Error while decoding json from crypto service response", zap.Error(err))
-		return app.WrapE(app.ErrInternal, "Foreign server issue or internal problem")
-	}
-
-	// Get the payload response struct
-	var payload interface{}
-	if body.Payload == nil {
-		s.logger.Error("Error, got an empty nil payload from crypto service", zap.Error(err))
-		return app.WrapE(app.ErrInternal, "Foreign server issue or internal problem")
-	}
-	payload = *body.Payload
-	pricesMap, ok := payload.(map[string]interface{})
-	if !ok {
-		s.logger.Error("Cannot cast payload to proper response type", zap.Error(err))
-		return app.WrapE(app.ErrInternal, "Foreign server issue or internal problem")
-	}
-	prices, ok := pricesMap["Prices"].(map[string]interface{})
-	if !ok {
-		s.logger.Error("Cannot cast payload to proper response type", zap.Error(err))
-		return app.WrapE(app.ErrInternal, "Foreign server issue or internal problem")
-	}
-
-	// Check if needed value exists
-	if _, ok := prices["USD"]; !ok {
-		s.logger.Error("Final map dont contain USD key")
-		return app.WrapE(app.ErrInternal, "Foreign server issue or internal problem")
-	}
-
-	// Get this value and try to covert to wanted type
-	currentSymbolPrice = prices["USD"].(float64)
 
 	// How much of crypto currency user buys(f.e. 1 BTC or 0.001 BTC)
 	userBuys := price / currentSymbolPrice
