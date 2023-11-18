@@ -39,8 +39,7 @@ services:
   account:
     build: ./account
     environment:
-      DB_URL: "postgres://admin:root@postgres:5432/database"
-      SECRET: "gfdgdkfk325k2kr2kl45dfsdF"
+      TEST_DB_URL: ""
     ports:
       - "8080:8080"
     depends_on:
@@ -49,12 +48,19 @@ services:
   crypto:
     build: ./crypto
     environment:
-      DB_URL: "postgres://admin:root@postgres:5432/database"
-      SECRET: "gfdgdkfk325k2kr2kl45dfsdF"
+      CRYPTO_COMPARE_KEY: 8b0b296373b86403560d64ab9a1e29ae35ab088e87ef5745f554ef5d0a2673be
     ports:
       - "8181:8181"
     depends_on:
-      - postgres
+      - account
+  
+  gateway:
+    build: ./gateway
+    ports:
+      - "8282:8282"
+    depends_on:
+      - account
+      - crypto
 
 volumes:
   forpostgres:
