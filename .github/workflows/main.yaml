@@ -1,0 +1,109 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - backend/dev
+
+env:
+  REGISTRY: "registry.digitalocean.com/crypto-app-registry"
+  ACCOUNT_IMAGE_NAME: "account-image"
+  ACCOUNT_CONTAINER_NAME: "account"
+  CRYPTO_IMAGE_NAME: "crypto-image"
+  CRYPTO_CONTAINER_NAME: "crypto"
+  GATEWAY_IMAGE_NAME: "gateway-image"
+  GATEWAY_CONTAINER_NAME: "gateway"
+  POSTGRES_DB: "db"
+  POSTGRES_USER: "admin"
+  POSTGRES_PASSWORD: "root"
+  
+
+jobs:
+  account:
+    build_and_push:
+      runs-on: ubuntu-latest
+
+      steps:
+        - name: Checkout backend/dev
+          uses: actions/checkout@v2
+
+        - name: Build container images
+          run: |
+            docker build -t $(echo $REGISTRY)/$(echo $ACCOUNT_IMAGE_NAME):$(echo $GITHUB_SHA | head -c7) ./account
+            docker build -t $(echo $REGISTRY)/$(echo $CRYPTO_IMAGE_NAME):$(echo $GITHUB_SHA | head -c7) ./crypto
+            docker build -t $(echo $REGISTRY)/$(echo $GATEWAY_IMAGE_NAME):$(echo $GITHUB_SHA | head -c7) ./gateway
+            
+        - name: Install doctl
+          uses: digitalocean/action-doctl@v2
+          with:
+            token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+
+        - name: Log in to DigitalOcean Container Registry with short-lived credentials
+          run: doctl registry login --expiry-seconds 600
+
+        - name: Push images to DigitalOcean Container Registry
+          run: |
+            docker push $(echo $REGISTRY)/$(echo $ACCOUNT_IMAGE_NAME):$(echo $GITHUB_SHA | head -c7)
+            docker push $(echo $REGISTRY)/$(echo $CRYPTO_IMAGE_NAME):$(echo $GITHUB_SHA | head -c7)
+            docker push $(echo $REGISTRY)/$(echo $GATEWAY_IMAGE_NAME):$(echo $GITHUB_SHA | head -c7)
+
+    deploy:
+      runs-on: ubuntu-latest
+      needs: build_and_push
+
+      steps:
+        - name: Deploy to Digital Ocean droplet via SSH action
+          uses: appleboy/ssh-action@v0.1.3
+          with:
+            host: ${{ secrets.HOST }}
+            username: ${{ secrets.USERNAME }}
+            key: ${{ secrets.SSHKEY }}
+            envs: ACCOUNT_IMAGE_NAME, CRYPTO_IMAGE_NAME, GATEWAY_IMAGE_NAME, REGISTRY, GITHUB_SHA, ACCOUNT_CONTAINER_NAME, CRYPTO_CONTAINER_NAME, GATEWAY_CONTAINER_NAME
+            script: |
+              # Login into Digital Ocean Registry
+              docker login -u ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }} -p ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }} $(echo $REGISTRY)
+
+              # Stop running containers
+              docker stop $(echo $ACCOUNT_CONTAINER_NAME)
+              docker stop $(echo $CRYPTO_CONTAINER_NAME)
+              docker stop $(echo $GATEWAY_CONTAINER_NAME)
+
+              # Remove old containers
+              docker rm $(echo $ACCOUNT_CONTAINER_NAME)
+              docker rm $(echo $CRYPTO_CONTAINER_NAME)
+              docker rm $(echo $GATEWAY_CONTAINER_NAME)
+
+              # Set env variables
+              export CRYPTO_COMPARE_KEY=${{ secrets.CRYPTO_COMPARE_KEY }}
+              export POSTGRES_DB=$(echo $POSTGRES_DB)
+              export POSTGRES_USER=$(echo $POSTGRES_USER)
+              export POSTGRES_PASSWORD=$(echo $POSTGRES_PASSWORD)
+              export PGDATA="/var/lib/postgresql/data/pgdata"
+
+              # Run postgres
+              docker run -e POSTGRES_DB -e POSTGRES_USER -e POSTGRES_PASSWORD -e PGDATA -d \
+              -v "$(pwd)":/docker-entrypoint-initdb.d \
+              -v "$(pwd)":/var/lib/postgresql/data \
+              --restart always \
+              --publish 5432:5432 \
+              --name postgres_container \
+              postgres:16.0
+
+              # Run containers
+              docker run -d \
+              --restart always \
+              --publish 8080:8080 \
+              --name $(echo $ACCOUNT_CONTAINER_NAME) \
+              $(echo $REGISTRY)/$(echo $ACCOUNT_IMAGE_NAME):$(echo $GITHUB_SHA | head -c7)
+
+              docker run -e CRYPTO_COMPARE_KEY -d \
+              --restart always \
+              --publish 8181:8181 \
+              --name $(echo $CRYPTO_CONTAINER_NAME) \
+              $(echo $REGISTRY)/$(echo $CRYPTO_IMAGE_NAME):$(echo $GITHUB_SHA | head -c7)
+
+              docker run -d \
+              --restart always \
+              --publish 8282:8282 \
+              --name $(echo $GATEWAY_CONTAINER_NAME) \
+              $(echo $REGISTRY)/$(echo $GATEWAY_IMAGE_NAME):$(echo $GITHUB_SHA | head -c7)

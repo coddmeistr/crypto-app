@@ -15,15 +15,15 @@ services:
       - "5432:5432"
 
   account:
+    container_name: account_container
     build: ./account
-    environment:
-      TEST_DB_URL: ""
     ports:
       - "8080:8080"
     depends_on:
       - postgres
 
   crypto:
+    container_name: crypto_container
     build: ./crypto
     environment:
       CRYPTO_COMPARE_KEY: 8b0b296373b86403560d64ab9a1e29ae35ab088e87ef5745f554ef5d0a2673be
@@ -33,6 +33,7 @@ services:
       - account
   
   gateway:
+    container_name: gateway_container
     build: ./gateway
     ports:
       - "8282:8282"
