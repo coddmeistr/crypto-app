@@ -1,6 +1,7 @@
 name: CI
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - backend/dev
@@ -16,6 +17,7 @@ env:
   POSTGRES_DB: "db"
   POSTGRES_USER: "admin"
   POSTGRES_PASSWORD: "root"
+  PGDATA: "/var/lib/postgresql/data/pgdata"
 
 jobs:
   build_and_push:
@@ -51,7 +53,7 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSHKEY }}
-          envs: ACCOUNT_IMAGE_NAME,CRYPTO_IMAGE_NAME,GATEWAY_IMAGE_NAME,REGISTRY,GITHUB_SHA,ACCOUNT_CONTAINER_NAME,CRYPTO_CONTAINER_NAME,GATEWAY_CONTAINER_NAME,POSTGRES_DB,POSTGRES_USER,POSTGRES_PASSWORD
+          envs: ACCOUNT_IMAGE_NAME,CRYPTO_IMAGE_NAME,GATEWAY_IMAGE_NAME,REGISTRY,GITHUB_SHA,ACCOUNT_CONTAINER_NAME,CRYPTO_CONTAINER_NAME,GATEWAY_CONTAINER_NAME,POSTGRES_DB,POSTGRES_USER,POSTGRES_PASSWORD,PGDATA
           script: |
             # Login into Digital Ocean Registry
             docker login -u natriy -p maxgold123 $(echo $REGISTRY)
@@ -68,13 +70,9 @@ jobs:
 
             # Set env variables
             export CRYPTO_COMPARE_KEY=${{ secrets.CRYPTO_COMPARE_KEY }}
-            export POSTGRES_DB=$(echo $POSTGRES_DB)
-            export POSTGRES_USER=$(echo $POSTGRES_USER)
-            export POSTGRES_PASSWORD=$(echo $POSTGRES_PASSWORD)
-            export PGDATA="/var/lib/postgresql/data/pgdata"
 
             # Run postgres
-            docker run -e POSTGRES_DB -e POSTGRES_USER -e POSTGRES_PASSWORD -e PGDATA -d \
+            docker run -e POSTGRES_DB=$(echo $POSTGRES_DB) -e POSTGRES_USER=$(echo $POSTGRES_USER) -e POSTGRES_PASSWORD=$(echo $POSTGRES_PASSWORD) -e PGDATA=$(echo $PGDATA) -d \
             -v "$(pwd)":/docker-entrypoint-initdb.d \
             -v "$(pwd)":/var/lib/postgresql/data \
             --restart no \
