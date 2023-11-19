@@ -32,7 +32,7 @@ jobs:
           docker build -t $(echo $REGISTRY)/$(echo $GATEWAY_IMAGE_NAME):$(echo $GITHUB_SHA | head -c7) ./gateway
 
       - name: Log in to GitLab Container Registry with short-lived credentials
-        run: docker login -u ${{ secrets.GITLAB_USERNAME }} -p ${{ secrets.GITLAB_PASSWORD }} $(echo $REGISTRY)
+        run: docker login -u natriy -p maxgold123 $(echo $REGISTRY)
 
       - name: Push images to Gitlab Registry
         run: |
@@ -54,7 +54,7 @@ jobs:
           envs: ACCOUNT_IMAGE_NAME, CRYPTO_IMAGE_NAME, GATEWAY_IMAGE_NAME, REGISTRY, GITHUB_SHA, ACCOUNT_CONTAINER_NAME, CRYPTO_CONTAINER_NAME, GATEWAY_CONTAINER_NAME
           script: |
             # Login into Digital Ocean Registry
-            docker login -u ${{ secrets.GITLAB_USERNAME }} -p ${{ secrets.GITLAB_PASSWORD }} $(echo $REGISTRY)
+            docker login -u natriy -p maxgold123 $(echo $REGISTRY)
 
             # Stop running containers
             docker stop $(echo $ACCOUNT_CONTAINER_NAME)
