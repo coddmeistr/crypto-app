@@ -27,7 +27,7 @@ import (
 // @BasePath /v1/crypto
 func main() {
 	if err := godotenv.Load(".env"); err != nil {
-		panic(fmt.Errorf("Fatal error environmental variables initialization: %s \n", err))
+		fmt.Printf("Couldn't load env variables from .env file")
 	}
 
 	_ = flag.Bool("docker", false, "Defines if app runs with docker")
