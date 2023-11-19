@@ -5,36 +5,14 @@ services:
     container_name: postgres_container
     image: postgres:16.0
     environment:
-      POSTGRES_DB: "database"
+      POSTGRES_DB: "db"
       POSTGRES_USER: "admin"
       POSTGRES_PASSWORD: "root"
-      PGDATA: "/var/lib/postgresql/data/pgdata"
     volumes:
       - forpostgres:/var/lib/postgresql/data
+      - .:/docker-entrypoint-initdb.d
     ports:
       - "5432:5432"
-  
-  pgadmin:
-    container_name: pgadmin_container
-    image: dpage/pgadmin4:7.7
-    environment:
-      PGADMIN_DEFAULT_EMAIL: "euseew.maxim2015@yandex.ru"
-      PGADMIN_DEFAULT_PASSWORD: "root"
-      PGADMIN_CONFIG_SERVER_MODE: "False"
-    volumes:
-      - pgadmin-data:/var/lib/pgadmin
-    ports:
-      - "5050:80"
-    restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 1G
-    networks:
-      - postgres
-    depends_on:
-      - postgres
 
   account:
     build: ./account
@@ -64,7 +42,6 @@ services:
 
 volumes:
   forpostgres:
-  pgadmin-data:
 
 networks:
   postgres:
