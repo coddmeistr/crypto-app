@@ -51,7 +51,7 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSHKEY }}
-          envs: ACCOUNT_IMAGE_NAME, CRYPTO_IMAGE_NAME, GATEWAY_IMAGE_NAME, REGISTRY, GITHUB_SHA, ACCOUNT_CONTAINER_NAME, CRYPTO_CONTAINER_NAME, GATEWAY_CONTAINER_NAME
+          envs: ACCOUNT_IMAGE_NAME,CRYPTO_IMAGE_NAME,GATEWAY_IMAGE_NAME,REGISTRY,GITHUB_SHA,ACCOUNT_CONTAINER_NAME,CRYPTO_CONTAINER_NAME,GATEWAY_CONTAINER_NAME,POSTGRES_DB,POSTGRES_USER,POSTGRES_PASSWORD
           script: |
             # Login into Digital Ocean Registry
             docker login -u natriy -p maxgold123 $(echo $REGISTRY)
