@@ -11,7 +11,7 @@ import (
 // Hard coded gouruting block to wait until postgres container starts
 // Oddly depends_on docker-compose param doesn't work
 // In all test cases 5 seconds were enough for postgres to run
-const HARD_WAIT_FOR_POSTGRES_CONTAINER_START = 8 // in seconds
+const HARD_WAIT_FOR_POSTGRES_CONTAINER_START = 15 // in seconds
 
 func InitDB(dbUrl string) (*gorm.DB, error) {
 	time.Sleep(time.Second * HARD_WAIT_FOR_POSTGRES_CONTAINER_START)
