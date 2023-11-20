@@ -60,6 +60,7 @@ jobs:
             docker login -u ${{ secrets.GITLAB_USERNAME }} -p ${{ secrets.GITLAB_PASSWORD }} $(echo $REGISTRY)
 
             # Stop running containers
+            docker stop postgres_container
             docker stop $(echo $ACCOUNT_CONTAINER_NAME)
             docker stop $(echo $CRYPTO_CONTAINER_NAME)
             docker stop $(echo $GATEWAY_CONTAINER_NAME)
