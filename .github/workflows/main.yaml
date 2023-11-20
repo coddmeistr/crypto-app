@@ -75,9 +75,10 @@ jobs:
             # Run postgres
             sudo docker run --user $(id -u):$(id -g) -e POSTGRES_DB=$(echo $POSTGRES_DB) -e POSTGRES_USER=$(echo $POSTGRES_USER) -e POSTGRES_PASSWORD=$(echo $POSTGRES_PASSWORD) -e PGDATA=$(echo $PGDATA) -d \
             -v pg-data:/pg-data \
-            --restart no \
-            --publish 5432:5432 \
             --name postgres_container \
+            --hostname postgresdb \
+            --publish 5432:5432 \
+            --restart no \
             postgres:16.0
 
             # Run containers

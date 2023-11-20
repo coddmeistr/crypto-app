@@ -8,6 +8,7 @@ services:
       POSTGRES_DB: "db"
       POSTGRES_USER: "admin"
       POSTGRES_PASSWORD: "root"
+    hostname: "postgresdb"
     volumes:
       - forpostgres:/var/lib/postgresql/data
       - .:/docker-entrypoint-initdb.d
