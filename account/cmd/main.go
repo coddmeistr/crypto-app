@@ -11,8 +11,6 @@ import (
 	"github.com/maxim12233/crypto-app-server/account/transport"
 )
 
-// Just triggering workflow xd
-
 // @title Account Service API
 // @version 1.0
 // @description Swagger API for Golang Project Crypto Service.
