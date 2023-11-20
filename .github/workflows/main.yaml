@@ -64,6 +64,7 @@ jobs:
             docker stop $(echo $GATEWAY_CONTAINER_NAME)
 
             # Remove old containers
+            docker rm postgres_container
             docker rm $(echo $ACCOUNT_CONTAINER_NAME)
             docker rm $(echo $CRYPTO_CONTAINER_NAME)
             docker rm $(echo $GATEWAY_CONTAINER_NAME)
@@ -72,7 +73,7 @@ jobs:
             export CRYPTO_COMPARE_KEY=${{ secrets.CRYPTO_COMPARE_KEY }}
 
             # Run postgres
-            docker run -e POSTGRES_DB=$(echo $POSTGRES_DB) -e POSTGRES_USER=$(echo $POSTGRES_USER) -e POSTGRES_PASSWORD=$(echo $POSTGRES_PASSWORD) -e PGDATA=$(echo $PGDATA) -d \
+            sudo docker run --user $(id -u):$(id -g) -e POSTGRES_DB=$(echo $POSTGRES_DB) -e POSTGRES_USER=$(echo $POSTGRES_USER) -e POSTGRES_PASSWORD=$(echo $POSTGRES_PASSWORD) -e PGDATA=$(echo $PGDATA) -d \
             -v "$(pwd)":/docker-entrypoint-initdb.d \
             -v "$(pwd)":/var/lib/postgresql/data \
             --restart no \
