@@ -1,5 +1,5 @@
 database:
-  docker: postgres://admin:root@postgres_container:5432/db
+  docker: postgres://admin:root@localhost:5432/db
   local: postgres://postgres:maxgold123@localhost:5432/postgres
 
 http:
