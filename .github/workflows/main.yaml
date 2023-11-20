@@ -69,6 +69,8 @@ jobs:
             docker rm $(echo $CRYPTO_CONTAINER_NAME)
             docker rm $(echo $GATEWAY_CONTAINER_NAME)
 
+            # Remove old images TODO
+    
             # Set env variables
             export CRYPTO_COMPARE_KEY=${{ secrets.CRYPTO_COMPARE_KEY }}
 
