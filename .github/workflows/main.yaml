@@ -92,7 +92,7 @@ jobs:
             postgres:16.0
 
             # Run containers
-            docker run -e DB_CONNECTION_STRING=$(echo $POSTGRES_CONNECTION_STRING) CRYPTO_SERVICE_HOST=$(echo $CRYPTO_CONTAINER_NAME) -d \
+            docker run -e DB_CONNECTION_STRING=$(echo $POSTGRES_CONNECTION_STRING) -e CRYPTO_SERVICE_HOST=$(echo $CRYPTO_CONTAINER_NAME) -d \
             --restart always \
             --publish 8080:8080 \
             --name $(echo $ACCOUNT_CONTAINER_NAME) \
