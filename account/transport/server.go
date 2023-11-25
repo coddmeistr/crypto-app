@@ -8,5 +8,5 @@ import (
 func NewHttpHandler(eps endpoints.AccountEndpoint) {
 	config := config.GetConfig()
 	r := NewHTTPServer(eps)
-	r.Run(config.GetString("server.port"))
+	r.Run(config.Server.Port)
 }

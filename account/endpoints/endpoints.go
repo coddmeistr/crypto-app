@@ -64,10 +64,10 @@ func MakeCreateAccountEndpoint(s service.IAccountService) gin.HandlerFunc {
 
 		cfg := config.GetConfig()
 		var (
-			login_max_length    = cfg.GetInt("validation.login.max_length")
-			login_min_length    = cfg.GetInt("validation.login.min_length")
-			password_max_length = cfg.GetInt("validation.password.max_length")
-			password_min_length = cfg.GetInt("validation.password.min_length")
+			login_max_length    = cfg.Validation.Login.MaxLength
+			login_min_length    = cfg.Validation.Login.MinLength
+			password_max_length = cfg.Validation.Password.MaxLength
+			password_min_length = cfg.Validation.Password.MinLength
 		)
 
 		// Validation

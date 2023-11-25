@@ -1,6 +1,3 @@
-http:
-  session_domain: crypto
-
 server:
   port: :8181
 

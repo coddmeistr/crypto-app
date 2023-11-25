@@ -106,7 +106,7 @@ jobs:
             --network $(echo $NETWORK_NAME) \
             $(echo $REGISTRY)/$(echo $CRYPTO_IMAGE_NAME):$(echo $GITHUB_SHA | head -c7)
 
-            docker run -e CRYPTO_SERVICE_HOST=$(echo $CRYPTO_CONTAINER_NAME) -e ACCOUNT_SERVICE_HOST=$(echo $ACCOUNT_CONTAINER_NAME) -d \
+            docker run -e CRYPTO_SERVICE_HOST=$(echo $CRYPTO_CONTAINER_NAME) -e ACCOUNT_SERVICE_HOST=$(echo $ACCOUNT_CONTAINER_NAME) -e SECRET_KEY=${{ secrets.SECRET_KEY }} -d \
             --restart always \
             --publish 8282:8282 \
             --name $(echo $GATEWAY_CONTAINER_NAME) \

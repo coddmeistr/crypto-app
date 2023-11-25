@@ -14,7 +14,7 @@ func NewHTTPServer(eps endpoints.AccountEndpoint) *gin.Engine {
 	router := gin.Default()
 
 	c := config.GetConfig()
-	if c.GetString("env.mode") != "debug" {
+	if c.Environment.Mode != "debug" {
 		gin.SetMode(gin.ReleaseMode)
 	}
 	gin.SetMode(gin.DebugMode)

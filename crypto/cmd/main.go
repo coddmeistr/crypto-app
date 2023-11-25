@@ -40,7 +40,7 @@ func main() {
 
 	logger := config.InitializeLogger()
 
-	market, err := cryptocompare.NewCryptoCompare(c.GetString("crypto_compare.app_name"), os.Getenv("CRYPTO_COMPARE_KEY"))
+	market, err := cryptocompare.NewCryptoCompare(c.CryptoCompare.AppName, os.Getenv("CRYPTO_COMPARE_KEY"))
 	if err != nil {
 		panic(fmt.Errorf("Fatal error market initialization: %s \n", err))
 	}

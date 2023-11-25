@@ -27,7 +27,7 @@ func AuthMiddleware(validRoles []uint) func(c *gin.Context) {
 				return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
 			}
 
-			return []byte(config.GetString("server.secret_key")), nil
+			return []byte(config.Server.SecretKey), nil
 		})
 		if err != nil {
 			common.ReturnAnauthorized(c)

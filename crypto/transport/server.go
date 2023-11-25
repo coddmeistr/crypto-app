@@ -10,5 +10,5 @@ func NewHttpHandler(eps endpoints.CryptoEndpoint) {
 	config := config.GetConfig()
 	r := NewHTTPServer(eps)
 	r = ws.NewWebsocketServer(r)
-	r.Run(config.GetString("server.port"))
+	r.Run(config.Server.Port)
 }

@@ -1,9 +1,12 @@
 package main
 
 import (
+	"flag"
 	"fmt"
+	"net/url"
 
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 	_ "github.com/maxim12233/crypto-app-server/gateway/docs"
 	"github.com/maxim12233/crypto-app-server/gateway/internal/config"
 	account_handler "github.com/maxim12233/crypto-app-server/gateway/internal/handlers/account"
@@ -13,7 +16,6 @@ import (
 	"github.com/maxim12233/crypto-app-server/gateway/pkg/cors"
 	"github.com/maxim12233/crypto-app-server/gateway/pkg/logger"
 	"github.com/maxim12233/crypto-app-server/gateway/pkg/metrics"
-	"github.com/spf13/viper"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"go.uber.org/zap"
@@ -34,6 +36,13 @@ import (
 // @host localhost:8282
 // @BasePath /api
 func main() {
+	if err := godotenv.Load(".env"); err != nil {
+		fmt.Printf("Couldn't load env variables from .env file")
+	}
+
+	_ = flag.Bool("docker", false, "Defines if app runs with docker")
+	flag.Parse()
+
 	logger := logger.Init()
 
 	if err := config.Init("local"); err != nil {
@@ -50,20 +59,32 @@ func main() {
 	metricHandler := metrics.Metric{Logger: logger}
 	metricHandler.Register(router)
 
-	cryptoService := crypto_service.NewService(cfg.GetString("crypto_service.url"), logger)
+	var cryptoBaseUrl = url.URL{
+		Scheme: "http",
+		Host:   cfg.CryptoService.Host,
+		Path:   cfg.CryptoService.Url,
+	}
+	cryptoService := crypto_service.NewService(cryptoBaseUrl.String(), logger)
 	cryptoHandler := crypto_handler.Handler{CryptoService: cryptoService, Logger: logger}
 	cryptoHandler.Register(router)
 
-	accountService := account_service.NewService(cfg.GetString("account_service.url"), logger)
+	var accountBaseUrl = url.URL{
+		Scheme: "http",
+		Host:   cfg.AccountService.Host,
+		Path:   cfg.AccountService.Url,
+	}
+	accountService := account_service.NewService(accountBaseUrl.String(), logger)
 	accountHandler := account_handler.Handler{AccountService: accountService, Logger: logger}
 	accountHandler.Register(router)
 
-	start(router, logger, cfg)
+	start(router, logger)
 }
 
-func start(router *gin.Engine, logger *zap.Logger, cfg *viper.Viper) {
+func start(router *gin.Engine, logger *zap.Logger) {
 
-	logger.Info(fmt.Sprintf("bind application to host: %s and port: %s", "localhost", cfg.GetString("server.port")))
+	cfg := config.GetConfig()
+
+	logger.Info(fmt.Sprintf("bind application to host: %s and port: %s", "localhost", cfg.Server.Port))
 
 	/*listener, err = net.Listen("tcp", fmt.Sprintf("%s:%s", "localhost", cfg.GetString("server.port")))
 	if err != nil {
@@ -91,5 +112,5 @@ func start(router *gin.Engine, logger *zap.Logger, cfg *viper.Viper) {
 	}
 	*/
 	logger.Info("application initialized and started")
-	router.Run(cfg.GetString("server.port"))
+	router.Run(cfg.Server.Port)
 }

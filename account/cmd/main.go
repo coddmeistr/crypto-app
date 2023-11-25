@@ -30,23 +30,17 @@ func main() {
 		log.Printf("Couldn't load env vars from .env file")
 	}
 
-	isDocker := flag.Bool("docker", false, "Defines if app runs with docker")
+	_ = flag.Bool("docker", false, "Defines if app runs with docker")
 	flag.Parse()
 
 	if err := config.Init("local"); err != nil {
 		panic(err)
 	}
-	c := config.GetConfig()
 
 	var dbUrl string
 	dbUrl = os.Getenv("DB_CONNECTION_STRING")
 	if dbUrl == "" {
-		log.Printf("DB_CONNECTION_STRING env variable is empty. Loading db string from config")
-		if *isDocker {
-			dbUrl = c.GetString("database.docker")
-		} else {
-			dbUrl = c.GetString("database.local")
-		}
+		panic("DB_CONNECTION_STRING env is empty string")
 	}
 	dbSession, err := repository.InitDB(dbUrl)
 	if err != nil {

@@ -1,9 +1,5 @@
-http:
-  session_domain: gateway
-
 server:
   port: :8282
-  secret_key: dfg4sdgssefg34egdgghdfgd
 
 env:
   mode: debug
@@ -12,8 +8,8 @@ auth:
   jwtexpseconds: 360000000
 
 account_service:
-  url: http://localhost:8080/v1/account
+  url: /v1/account
 
 crypto_service:
-  url: http://localhost:8181/v1/crypto
-  ws:  http://localhost:8181/ws
+  url: /v1/crypto
+  ws:  /ws

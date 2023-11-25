@@ -2,6 +2,7 @@ package crypto_handler
 
 import (
 	"net/http"
+	"net/url"
 
 	"github.com/gin-gonic/gin"
 
@@ -117,9 +118,17 @@ func (h *Handler) GetDifference(c *gin.Context) {
 }
 
 func (h *Handler) EstablishWebsocketConnection(c *gin.Context) {
-	wsUrl := config.GetConfig().GetString("crypto_service.ws")
+	cfg := config.GetConfig()
+	wsUrl := cfg.CryptoService.Ws
+	host := cfg.CryptoService.Host
 
-	c.Header("Location", wsUrl)
+	var u = url.URL{
+		Scheme: "http",
+		Host:   host,
+		Path:   wsUrl,
+	}
+
+	c.Header("Location", u.String())
 
 	handlers.WriteJSONResponse(c, http.StatusTemporaryRedirect, "Resource temporary moved to other URL", nil)
 }

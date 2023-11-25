@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"path"
 
 	app "github.com/maxim12233/crypto-app-server/account"
 	"github.com/maxim12233/crypto-app-server/account/config"
@@ -20,15 +19,15 @@ func fetchSymbolPriceFromCryptoMicroservice(symbol string, currency string, logg
 
 	// Take the current price for symbol via asking crypto microservice
 	// Using config values to get host and path to foreign microservice
+	cfg := config.GetConfig()
 	var currentSymbolPrice float64
-	host := config.GetConfig().GetString("dependencies.crypto_service.host")
-	resPath := config.GetConfig().GetString("dependencies.crypto_service.endpoints.current_prices")
-	uri, err := url.ParseRequestURI(host)
-	if err != nil {
-		logger.Error("Couldn't parse uri from the config host string", zap.Error(err))
-		return 0, app.WrapE(app.ErrInternal, "Foreign server issue or internal problem")
+	host := cfg.Dependencies.CryptoService.Host
+	resPath := cfg.Dependencies.CryptoService.Endpoints.GetCurrentPrices
+	uri := url.URL{
+		Scheme: "http",
+		Host:   host,
+		Path:   resPath,
 	}
-	uri.Path = path.Join(uri.Path, resPath)
 	q := uri.Query()
 	q.Set("symbol", symbol)
 	q.Set("symbolsTo", currency)
