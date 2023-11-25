@@ -19,7 +19,7 @@ func NewHTTPServer(eps endpoints.AccountEndpoint) *gin.Engine {
 	}
 	gin.SetMode(gin.DebugMode)
 
-	// swagger
+	// swagger endp
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	v1 := router.Group("v1")
