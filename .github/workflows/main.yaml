@@ -94,21 +94,21 @@ jobs:
             # Run containers
             docker run -e DB_CONNECTION_STRING=$(echo $POSTGRES_CONNECTION_STRING) -e CRYPTO_SERVICE_HOST=$(echo $CRYPTO_CONTAINER_NAME) -d \
             --restart always \
-            --publish 8080:80 \
+            --publish 80:80 \
             --name $(echo $ACCOUNT_CONTAINER_NAME) \
             --network $(echo $NETWORK_NAME) \
             $(echo $REGISTRY)/$(echo $ACCOUNT_IMAGE_NAME):$(echo $GITHUB_SHA | head -c7)
 
             docker run -e CRYPTO_COMPARE_KEY -d \
             --restart always \
-            --publish 8181:80 \
+            --publish 80:80 \
             --name $(echo $CRYPTO_CONTAINER_NAME) \
             --network $(echo $NETWORK_NAME) \
             $(echo $REGISTRY)/$(echo $CRYPTO_IMAGE_NAME):$(echo $GITHUB_SHA | head -c7)
 
             docker run -e CRYPTO_SERVICE_HOST=$(echo $CRYPTO_CONTAINER_NAME) -e ACCOUNT_SERVICE_HOST=$(echo $ACCOUNT_CONTAINER_NAME) -e SECRET_KEY=${{ secrets.SECRET_KEY }} -d \
             --restart always \
-            --publish 8282:80 \
+            --publish 80:80 \
             --name $(echo $GATEWAY_CONTAINER_NAME) \
             --network $(echo $NETWORK_NAME) \
             $(echo $REGISTRY)/$(echo $GATEWAY_IMAGE_NAME):$(echo $GITHUB_SHA | head -c7)
