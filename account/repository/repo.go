@@ -195,7 +195,7 @@ func (r *AccountRepository) CreateAccount(a models.Account) error {
 }
 
 func (r *AccountRepository) DeleteAccountById(id uint) error {
-	result := r.db.Model(&models.Account{}).Delete(id)
+	result := r.db.Delete(&models.Account{}, id)
 	if result.Error != nil {
 		r.logger.Error("Delete account error", zap.Error(result.Error))
 		return app.ErrInternal
