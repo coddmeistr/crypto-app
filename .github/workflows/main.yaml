@@ -69,6 +69,7 @@ jobs:
             docker login -u ${{ secrets.GITLAB_USERNAME }} -p ${{ secrets.GITLAB_PASSWORD }} $(echo $REGISTRY)
 
             # Creating new network for docker containers
+            docker network rm $(echo $NETWORK_NAME)
             docker network create $(echo $NETWORK_NAME)
 
             # Stop running containers
