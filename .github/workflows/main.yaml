@@ -8,12 +8,19 @@ on:
 
 env:
   REGISTRY: "registry.gitlab.com/apps6412746/crypto-app"
+
   ACCOUNT_IMAGE_NAME: "account-image"
   ACCOUNT_CONTAINER_NAME: "account"
+  ACCOUNT_PORT: "8080"
+
   CRYPTO_IMAGE_NAME: "crypto-image"
   CRYPTO_CONTAINER_NAME: "crypto"
+  CRYPTO_PORT: "8181"
+
   GATEWAY_IMAGE_NAME: "gateway-image"
   GATEWAY_CONTAINER_NAME: "gateway"
+  GATEWAY_PORT: "8282"
+
   POSTGRES_DB: "db"
   POSTGRES_USER: "admin"
   POSTGRES_PASSWORD: "root"
@@ -56,7 +63,7 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSHKEY }}
-          envs: NETWORK_NAME,ACCOUNT_IMAGE_NAME,CRYPTO_IMAGE_NAME,GATEWAY_IMAGE_NAME,REGISTRY,GITHUB_SHA,ACCOUNT_CONTAINER_NAME,CRYPTO_CONTAINER_NAME,GATEWAY_CONTAINER_NAME,POSTGRES_DB,POSTGRES_USER,POSTGRES_PASSWORD,PGDATA,POSTGRES_CONNECTION_STRING
+          envs: NETWORK_NAME,ACCOUNT_IMAGE_NAME,CRYPTO_IMAGE_NAME,GATEWAY_IMAGE_NAME,REGISTRY,GITHUB_SHA,ACCOUNT_CONTAINER_NAME,CRYPTO_CONTAINER_NAME,GATEWAY_CONTAINER_NAME,POSTGRES_DB,POSTGRES_USER,POSTGRES_PASSWORD,PGDATA,POSTGRES_CONNECTION_STRING,ACCOUNT_PORT,CRYPTO_PORT,GATEWAY_PORT
           script: |
             # Login into Digital Ocean Registry
             docker login -u ${{ secrets.GITLAB_USERNAME }} -p ${{ secrets.GITLAB_PASSWORD }} $(echo $REGISTRY)
@@ -92,23 +99,23 @@ jobs:
             postgres:16.0
 
             # Run containers
-            docker run -e DB_CONNECTION_STRING=$(echo $POSTGRES_CONNECTION_STRING) -e CRYPTO_SERVICE_HOST=$(echo $CRYPTO_CONTAINER_NAME) -d \
+            docker run -e DB_CONNECTION_STRING=$(echo $POSTGRES_CONNECTION_STRING) -e CRYPTO_SERVICE_HOST=$(echo $CRYPTO_CONTAINER_NAME):$(echo $CRYPTO_PORT) -d \
             --restart always \
-            --publish 80:80 \
+            --publish $(echo $ACCOUNT_PORT):$(echo $ACCOUNT_PORT) \
             --name $(echo $ACCOUNT_CONTAINER_NAME) \
             --network $(echo $NETWORK_NAME) \
             $(echo $REGISTRY)/$(echo $ACCOUNT_IMAGE_NAME):$(echo $GITHUB_SHA | head -c7)
 
             docker run -e CRYPTO_COMPARE_KEY -d \
             --restart always \
-            --publish 80:80 \
+            --publish $(echo $CRYPTO_PORT):$(echo $CRYPTO_PORT) \
             --name $(echo $CRYPTO_CONTAINER_NAME) \
             --network $(echo $NETWORK_NAME) \
             $(echo $REGISTRY)/$(echo $CRYPTO_IMAGE_NAME):$(echo $GITHUB_SHA | head -c7)
 
-            docker run -e CRYPTO_SERVICE_HOST=$(echo $CRYPTO_CONTAINER_NAME) -e ACCOUNT_SERVICE_HOST=$(echo $ACCOUNT_CONTAINER_NAME) -e SECRET_KEY=${{ secrets.SECRET_KEY }} -d \
+            docker run -e CRYPTO_SERVICE_HOST=$(echo $CRYPTO_CONTAINER_NAME):$(echo $CRYPTO_PORT) -e ACCOUNT_SERVICE_HOST=$(echo $ACCOUNT_CONTAINER_NAME):$(echo $ACCOUNT_PORT) -e SECRET_KEY=${{ secrets.SECRET_KEY }} -d \
             --restart always \
-            --publish 80:80 \
+            --publish $(echo $GATEWAY_PORT):$(echo $GATEWAY_PORT) \
             --name $(echo $GATEWAY_CONTAINER_NAME) \
             --network $(echo $NETWORK_NAME) \
             $(echo $REGISTRY)/$(echo $GATEWAY_IMAGE_NAME):$(echo $GITHUB_SHA | head -c7)
