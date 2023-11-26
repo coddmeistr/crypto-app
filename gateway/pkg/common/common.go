@@ -21,3 +21,18 @@ func ReturnAnauthorized(c *gin.Context) {
 		Message: "Unauthorized access",
 	})
 }
+
+func ReturnForbidden(c *gin.Context) {
+	logger := logger.GetLogger()
+	logger.Error("Resource forbidden")
+	c.AbortWithStatusJSON(http.StatusForbidden, Response{
+		Error: []ErrorDetail{
+			{
+				ErrorType:    "ErrorForbidden",
+				ErrorMessage: "You are not allowed to access this path",
+			},
+		},
+		Status:  http.StatusForbidden,
+		Message: "No permission to access this path",
+	})
+}

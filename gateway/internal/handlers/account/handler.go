@@ -10,6 +10,7 @@ import (
 	"github.com/maxim12233/crypto-app-server/gateway/internal/models"
 	account_service "github.com/maxim12233/crypto-app-server/gateway/internal/services/account"
 	"github.com/maxim12233/crypto-app-server/gateway/pkg/jwt"
+	"github.com/maxim12233/crypto-app-server/gateway/pkg/matcher"
 
 	"go.uber.org/zap"
 )
@@ -32,15 +33,27 @@ type Handler struct {
 }
 
 func (h *Handler) Register(router *gin.Engine) {
-	router.GET(accountGetAccountURL, jwt.AuthMiddleware([]uint{1}), h.GetAccount)
-	router.POST(accountCreateAccountURL, h.CreateAccount)
-	router.DELETE(accountDeleteAccountURL, jwt.AuthMiddleware([]uint{1}), h.DeleteAccount)
-	router.GET(accountGetAccountBalanceURL, jwt.AuthMiddleware([]uint{1}), h.GetAccountBalance)
-	router.POST(accountBuyActivityURL, jwt.AuthMiddleware([]uint{1}), h.BuyActivity)
-	router.DELETE(accountSellActivityURL, jwt.AuthMiddleware([]uint{1}), h.SellActivity)
-	router.PUT(accountLoginURL, h.Login)
-	router.PUT(accountFakeDepositURL, jwt.AuthMiddleware([]uint{1}), h.FakeDeposit)
-	router.GET(accountGetActivitiesURL, jwt.AuthMiddleware([]uint{1}), h.GetActivities)
+	public := router.Group("")
+	public.PUT(accountLoginURL, h.Login)
+	public.POST(accountCreateAccountURL, h.CreateAccount)
+
+	auth := router.Group("")
+	auth.Use(
+		jwt.AuthMiddleware([]uint{1}),
+	)
+	auth.GET(accountGetAccountURL, h.GetAccount)
+
+	authWithMatcher := router.Group("")
+	authWithMatcher.Use(
+		jwt.AuthMiddleware([]uint{1}),
+		matcher.MatchPathParamWithContextKey("id", "ID"),
+	)
+	authWithMatcher.DELETE(accountDeleteAccountURL, h.DeleteAccount)
+	authWithMatcher.GET(accountGetAccountBalanceURL, h.GetAccountBalance)
+	authWithMatcher.POST(accountBuyActivityURL, h.BuyActivity)
+	authWithMatcher.DELETE(accountSellActivityURL, h.SellActivity)
+	authWithMatcher.PUT(accountFakeDepositURL, h.FakeDeposit)
+	authWithMatcher.GET(accountGetActivitiesURL, h.GetActivities)
 }
 
 func (h *Handler) GetActivities(c *gin.Context) {
