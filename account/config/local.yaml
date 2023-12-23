@@ -6,10 +6,10 @@ env:
 
 validation:
   password:
-    min_length: 6
+    min_length: 2
     max_length: 20
   login:
-    min_length: 6
+    min_length: 2
     max_length: 20
 
 dependencies:

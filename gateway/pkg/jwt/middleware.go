@@ -15,7 +15,8 @@ func AuthMiddleware(validRoles []uint) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		config := config.GetConfig()
 
-		tokenString := c.GetHeader("Authorization")
+		fmt.Println(c.GetString("Authorization"))
+		tokenString := c.GetString("Authorization")
 		if tokenString == "0" || tokenString == "" {
 			common.ReturnAnauthorized(c)
 			return
@@ -75,5 +76,27 @@ func AuthMiddleware(validRoles []uint) func(c *gin.Context) {
 		} else {
 			common.ReturnAnauthorized(c)
 		}
+	}
+}
+
+func AuthorizationToken(c *gin.Context) {
+	var token string
+
+	token = c.GetHeader("Authorization")
+	if token != "" {
+		c.Set("Authorization", token)
+		return
+	}
+
+	token, ok := c.GetQuery("authorization")
+	if ok {
+		c.Set("Authorization", token)
+		return
+	}
+
+	token, ok = c.GetPostForm("authorization")
+	if ok {
+		c.Set("Authorization", token)
+		return
 	}
 }

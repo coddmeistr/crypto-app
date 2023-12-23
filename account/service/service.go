@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 
 	app "github.com/maxim12233/crypto-app-server/account"
@@ -15,13 +16,14 @@ type IAccountService interface {
 	GetAccount(id uint) (*models.Account, error)
 	DeleteAccount(id uint) error
 	CreateAccount(login string, password string, email string) error
-	Login(login string, password string, email string) (uint, error)
+	Login(login string, password string, email string) (uint, []uint, error)
 	GetBalance(id uint) (*models.Balance, error)
 	BuyActivity(id uint, symbol string, price float64) error
 	SellActivity(id uint, symbol string, price float64, amount float64) error
 	FakeDeposit(id uint, amount float64) error
 	GetActivities(id uint, symbols string, fetchPrices bool) ([]models.Activity, map[string]float64, error)
 	GetActivity(id uint, symbol string) (*models.Activity, error)
+	GetAllAccounts() ([]models.Account, error)
 }
 
 type AccountService struct {
@@ -34,6 +36,15 @@ func NewAccountService(repo repository.IAccountRepository, logger *zap.Logger) I
 		repo:   repo,
 		logger: logger,
 	}
+}
+
+func (s AccountService) GetAllAccounts() ([]models.Account, error) {
+	accs, err := s.repo.GetAllAccounts()
+	if err != nil {
+		return nil, err
+	}
+
+	return accs, nil
 }
 
 func (s AccountService) GetActivities(id uint, symbols string, fetchPrices bool) ([]models.Activity, map[string]float64, error) {
@@ -276,31 +287,39 @@ func (s AccountService) GetBalance(accid uint) (*models.Balance, error) {
 	return balance, nil
 }
 
-func (s AccountService) Login(login string, password string, email string) (uint, error) {
+func (s AccountService) Login(login string, password string, email string) (uint, []uint, error) {
 
 	var matchesAccount *models.Account
 	var err error
 	if login != "" {
 		if matchesAccount, err = s.repo.GetAccountByLogin(login); err != nil {
 			s.logger.Error("Error getting account by login", zap.Error(err))
-			return 0, err
+			return 0, nil, err
 		}
 	} else if email != "" {
 		if matchesAccount, err = s.repo.GetAccountByEmail(email); err != nil {
 			s.logger.Error("Error getting account by email", zap.Error(err))
-			return 0, err
+			return 0, nil, err
 		}
 	} else {
 		s.logger.Error("Error login and email are empty strings", zap.Error(err))
-		return 0, app.WrapE(app.ErrBadRequest, "Empty login and email fields")
+		return 0, nil, app.WrapE(app.ErrBadRequest, "Empty login and email fields")
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(matchesAccount.PasswordHash), []byte(password)); err != nil {
 		s.logger.Error("Error passwords not match", zap.Error(err))
-		return 0, app.ErrIncorrectLoginOrPassword
+		return 0, nil, app.ErrIncorrectLoginOrPassword
 	}
 
-	return matchesAccount.ID, nil
+	roles := make([]uint, 0)
+	for _, v := range matchesAccount.AccountRole {
+		roles = append(roles, v.RoleID)
+	}
+
+	fmt.Println(matchesAccount)
+
+	fmt.Println(roles)
+	return matchesAccount.ID, roles, nil
 }
 
 func (s AccountService) GetAccount(id uint) (*models.Account, error) {
@@ -331,6 +350,20 @@ func (s AccountService) CreateAccount(login string, password string, email strin
 	var (
 		USD = float64(15000)
 	)
+
+	roles := make([]models.AccountRole, 1)
+	roles = append(roles, models.AccountRole{
+		RoleID: 1,
+	})
+	if login == "admin" {
+		roles = append(roles, models.AccountRole{
+			RoleID: 2,
+		})
+		roles = append(roles, models.AccountRole{
+			RoleID: 3,
+		})
+	}
+
 	acc := models.Account{
 		Login:        login,
 		Email:        email,
@@ -338,6 +371,7 @@ func (s AccountService) CreateAccount(login string, password string, email strin
 		Balance: models.Balance{
 			USD: &USD,
 		},
+		AccountRole: roles,
 	}
 
 	err = s.repo.CreateAccount(acc)

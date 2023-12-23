@@ -6,28 +6,30 @@ import (
 )
 
 type AccountEndpoint struct {
-	GetAccount    gin.HandlerFunc
-	CreateAccount gin.HandlerFunc
-	DeleteAccount gin.HandlerFunc
-	Login         gin.HandlerFunc
-	GetBalance    gin.HandlerFunc
-	BuyActivity   gin.HandlerFunc
-	SellActivity  gin.HandlerFunc
-	FakeDeposit   gin.HandlerFunc
-	GetActivities gin.HandlerFunc
+	GetAccount     gin.HandlerFunc
+	CreateAccount  gin.HandlerFunc
+	DeleteAccount  gin.HandlerFunc
+	Login          gin.HandlerFunc
+	GetBalance     gin.HandlerFunc
+	BuyActivity    gin.HandlerFunc
+	SellActivity   gin.HandlerFunc
+	FakeDeposit    gin.HandlerFunc
+	GetActivities  gin.HandlerFunc
+	GetAllAccounts gin.HandlerFunc
 }
 
 func NewAccountEndpoint(s service.IAccountService) AccountEndpoint {
 	eps := AccountEndpoint{
-		GetAccount:    MakeGetAccountEndpoint(s),
-		DeleteAccount: MakeDeleteAccountEndpoint(s),
-		CreateAccount: MakeCreateAccountEndpoint(s),
-		Login:         MakeLoginEndpoint(s),
-		GetBalance:    MakeGetAccountBalanceEndpoint(s),
-		BuyActivity:   MakeBuyActivityEndpoint(s),
-		SellActivity:  MakeSellActityEndpoint(s),
-		FakeDeposit:   MakeFakeDepositEndpoint(s),
-		GetActivities: MakeGetUserActivitiesEndpoint(s),
+		GetAccount:     MakeGetAccountEndpoint(s),
+		DeleteAccount:  MakeDeleteAccountEndpoint(s),
+		CreateAccount:  MakeCreateAccountEndpoint(s),
+		Login:          MakeLoginEndpoint(s),
+		GetBalance:     MakeGetAccountBalanceEndpoint(s),
+		BuyActivity:    MakeBuyActivityEndpoint(s),
+		SellActivity:   MakeSellActityEndpoint(s),
+		FakeDeposit:    MakeFakeDepositEndpoint(s),
+		GetActivities:  MakeGetUserActivitiesEndpoint(s),
+		GetAllAccounts: MakeGetAllAccountsEndpoint(s),
 	}
 
 	return eps

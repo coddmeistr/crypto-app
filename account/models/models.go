@@ -11,6 +11,7 @@ type Account struct {
 	Email        string `gorm:"unique"`
 	Balance      Balance
 	Activity     []Activity
+	AccountRole  []AccountRole
 }
 
 type Balance struct {
@@ -24,4 +25,15 @@ type Activity struct {
 	AccountID uint
 	Symbol    string  `gorm:"not null"`
 	Amount    float64 `gorm:"not null"`
+}
+
+type AccountRole struct {
+	gorm.Model
+	AccountID uint
+	RoleID    uint
+}
+
+type Role struct {
+	gorm.Model
+	Name string
 }

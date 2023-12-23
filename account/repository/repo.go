@@ -7,12 +7,14 @@ import (
 	"github.com/maxim12233/crypto-app-server/account/models"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type IAccountRepository interface {
 	GetAccountById(id uint) (*models.Account, error)
 	GetAccountByLogin(login string) (*models.Account, error)
 	GetAccountByEmail(email string) (*models.Account, error)
+	GetAllAccounts() ([]models.Account, error)
 	CreateAccount(a models.Account) error
 	DeleteAccountById(id uint) error
 	GetAccountBalance(accid uint) (*models.Balance, error)
@@ -34,6 +36,20 @@ func NewAccountRepository(db *gorm.DB, logger *zap.Logger) IAccountRepository {
 		db:     db,
 		logger: logger,
 	}
+}
+
+func (r *AccountRepository) GetAllAccounts() ([]models.Account, error) {
+	var a []models.Account
+	result := r.db.Preload(clause.Associations).Find(&a)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			r.logger.Error("Get all accounts error not found", zap.Error(result.Error))
+			return nil, app.ErrNotFound
+		}
+		r.logger.Error("Get all accounts error", zap.Error(result.Error))
+		return nil, app.ErrInternal
+	}
+	return a, nil
 }
 
 func (r *AccountRepository) GetActivities(accids []uint, symbols []string) ([]models.Activity, error) {
@@ -142,7 +158,7 @@ func (r *AccountRepository) GetAccountBalance(accid uint) (*models.Balance, erro
 func (r *AccountRepository) GetAccountById(id uint) (*models.Account, error) {
 
 	var a models.Account
-	result := r.db.First(&a, id)
+	result := r.db.Preload("AccountRole").Preload(clause.Associations).First(&a, id)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			r.logger.Error("Get account by id error", zap.Error(result.Error))
@@ -157,7 +173,7 @@ func (r *AccountRepository) GetAccountById(id uint) (*models.Account, error) {
 func (r *AccountRepository) GetAccountByEmail(email string) (*models.Account, error) {
 
 	var a models.Account
-	result := r.db.Where("email = ?", email).First(&a)
+	result := r.db.Where("email = ?", email).Preload(clause.Associations).First(&a)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			r.logger.Error("Get account by email error", zap.Error(result.Error))
@@ -172,7 +188,7 @@ func (r *AccountRepository) GetAccountByEmail(email string) (*models.Account, er
 func (r *AccountRepository) GetAccountByLogin(login string) (*models.Account, error) {
 
 	var a models.Account
-	result := r.db.Where("login = ?", login).First(&a)
+	result := r.db.Where("login = ?", login).Preload(clause.Associations).First(&a)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			r.logger.Error("Get account by login error", zap.Error(result.Error))

@@ -30,7 +30,8 @@ type LoginRequest struct {
 }
 
 type LoginResponse struct {
-	UserID uint `json:"id"`
+	UserID uint   `json:"id"`
+	Roles  []uint `json:"roles"`
 }
 
 type GetAccountResponse struct {

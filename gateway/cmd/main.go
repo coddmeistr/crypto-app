@@ -14,6 +14,7 @@ import (
 	account_service "github.com/maxim12233/crypto-app-server/gateway/internal/services/account"
 	crypto_service "github.com/maxim12233/crypto-app-server/gateway/internal/services/crypto"
 	"github.com/maxim12233/crypto-app-server/gateway/pkg/cors"
+	"github.com/maxim12233/crypto-app-server/gateway/pkg/jwt"
 	"github.com/maxim12233/crypto-app-server/gateway/pkg/logger"
 	"github.com/maxim12233/crypto-app-server/gateway/pkg/metrics"
 	swaggerFiles "github.com/swaggo/files"
@@ -52,6 +53,7 @@ func main() {
 
 	router := gin.Default()
 	router.Use(cors.CORSMiddleware())
+	router.Use(jwt.AuthorizationToken)
 
 	// register swagger
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

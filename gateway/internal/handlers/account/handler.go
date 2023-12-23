@@ -1,6 +1,7 @@
 package account_handler
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -9,6 +10,7 @@ import (
 	"github.com/maxim12233/crypto-app-server/gateway/internal/handlers"
 	"github.com/maxim12233/crypto-app-server/gateway/internal/models"
 	account_service "github.com/maxim12233/crypto-app-server/gateway/internal/services/account"
+	"github.com/maxim12233/crypto-app-server/gateway/pkg/common"
 	"github.com/maxim12233/crypto-app-server/gateway/pkg/jwt"
 	"github.com/maxim12233/crypto-app-server/gateway/pkg/matcher"
 
@@ -17,7 +19,7 @@ import (
 
 const (
 	accountGetAccountURL        = "/api/account/:id"
-	accountCreateAccountURL     = "/api/account"
+	accountCreateAccountURL     = "/api/account/create"
 	accountDeleteAccountURL     = "/api/account/:id"
 	accountGetAccountBalanceURL = "/api/account/:id/balance"
 	accountBuyActivityURL       = "/api/account/:id/activity"
@@ -25,6 +27,10 @@ const (
 	accountLoginURL             = "/api/account/login"
 	accountFakeDepositURL       = "/api/account/:id/balance"
 	accountGetActivitiesURL     = "/api/account/:id/activity"
+	getAccountDebug             = "/api/account/get"
+	getAccountBalanceDebug      = "/api/account/getbalance"
+	getAllAccounts              = "/api/account/getall"
+	getAccountInfo              = "/api/account/getinfo"
 )
 
 type Handler struct {
@@ -34,14 +40,22 @@ type Handler struct {
 
 func (h *Handler) Register(router *gin.Engine) {
 	public := router.Group("")
-	public.PUT(accountLoginURL, h.Login)
-	public.POST(accountCreateAccountURL, h.CreateAccount)
+	public.GET(accountLoginURL, h.Login)                 // TEMPERALY GET BUT WAS PUT
+	public.GET(accountCreateAccountURL, h.CreateAccount) // TEMPERALY GET BUT WAS POST
 
 	auth := router.Group("")
 	auth.Use(
 		jwt.AuthMiddleware([]uint{1}),
 	)
+	auth.GET(getAccountInfo, h.GetAccount)
 	auth.GET(accountGetAccountURL, h.GetAccount)
+	auth.GET(getAccountBalanceDebug, h.GetAccountBalance)
+
+	authAdmin := router.Group("")
+	authAdmin.Use(
+		jwt.AuthMiddleware([]uint{3}),
+	)
+	authAdmin.GET(getAllAccounts, h.GetAccounts)
 
 	authWithMatcher := router.Group("")
 	authWithMatcher.Use(
@@ -54,6 +68,21 @@ func (h *Handler) Register(router *gin.Engine) {
 	authWithMatcher.DELETE(accountSellActivityURL, h.SellActivity)
 	authWithMatcher.PUT(accountFakeDepositURL, h.FakeDeposit)
 	authWithMatcher.GET(accountGetActivitiesURL, h.GetActivities)
+}
+
+func (h *Handler) GetAccounts(c *gin.Context) {
+
+	result, err := h.AccountService.GetAllAccounts(c)
+	if err != nil {
+		handlers.WriteJSONResponse(c, app.GetHTTPCodeFromError(err), nil, &models.Error{Code: app.ErrorCode(err), Message: err.Error()})
+		return
+	}
+	if result.HaveError {
+		handlers.WriteJSONResponse(c, result.HttpCode, nil, result.Error)
+		return
+	}
+
+	handlers.WriteJSONResponse(c, result.HttpCode, result.Payload, nil)
 }
 
 func (h *Handler) GetActivities(c *gin.Context) {
@@ -105,6 +134,17 @@ func (h *Handler) GetAccount(c *gin.Context) {
 	}
 	if result.HaveError {
 		handlers.WriteJSONResponse(c, result.HttpCode, nil, result.Error)
+		return
+	}
+
+	payload := *result.Payload
+	data := payload.(map[string]interface{})
+	id1 := int(data["id"].(float64))
+	id2i, _ := c.Get("ID")
+	id2 := int(id2i.(float64))
+	fmt.Println(id1, " ", id2)
+	if id1 != id2 {
+		common.ReturnAnauthorized(c)
 		return
 	}
 

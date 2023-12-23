@@ -2,6 +2,7 @@ package account_service
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -23,6 +24,7 @@ const (
 	loginResource             = "/login"
 	fakeDepositResource       = "/:id/balance"
 	getActivitiesResource     = "/:id/activity"
+	getAllAccountsResource    = "/getall"
 )
 
 type client struct {
@@ -54,6 +56,41 @@ type IAccountService interface {
 	Login(ctx *gin.Context) (*string, error)
 	FakeDeposit(ctx *gin.Context) (*models.Response, error)
 	GetActivities(ctx *gin.Context) (*models.Response, error)
+	GetAllAccounts(cts *gin.Context) (*models.Response, error)
+}
+
+func (c *client) GetAllAccounts(ctx *gin.Context) (*models.Response, error) {
+
+	// Build resource URL: it's basically baseURL + resourceURL
+	uri, err := c.base.BuildURL(getAllAccountsResource, nil, nil)
+	if err != nil {
+		c.logger.Error("Error while building url", zap.Error(err))
+		return nil, app.ErrInternal
+	}
+
+	// Change destination URL and copy query from incoming request
+	req := ctx.Request
+	err = rest.ChangeRequestURLWithQuery(req, uri)
+	if err != nil {
+		c.logger.Error("Error while copying query", zap.Error(err))
+		return nil, app.ErrInternal
+	}
+
+	apiresp, err := c.base.SendRequest(req)
+	if err != nil {
+		c.logger.Error("Error sending request", zap.Error(err))
+		return nil, app.WrapE(app.ErrInternal, "Error with some of the service")
+	}
+
+	// Decode gained response to a basic response structure
+	// It default struct for microservices in this application
+	var resp models.Response
+	if err = json.NewDecoder(apiresp.Response().Body).Decode(&resp); err != nil {
+		c.logger.Error("Error decoding json from response body", zap.Error(err))
+		return nil, app.WrapE(app.ErrInternal, "Error with some of the service")
+	}
+
+	return &resp, nil
 }
 
 func (c *client) GetActivities(ctx *gin.Context) (*models.Response, error) {
@@ -421,9 +458,21 @@ func (c *client) Login(ctx *gin.Context) (*string, error) {
 		return nil, app.WrapE(app.ErrInternal, "Error with some of the service")
 	}
 
+	roles, ok := payloadMap["roles"].([]interface{})
+	if !ok {
+		c.logger.Error("Invalid payload data from login endpoint: with roles", zap.Error(err))
+		return nil, app.WrapE(app.ErrInternal, "Error with some of the service")
+	}
+
+	uintRoles := make([]uint, 0)
+	for _, v := range roles {
+		uintRoles = append(uintRoles, uint(v.(float64)))
+	}
+
+	fmt.Println(uintRoles)
 	// Generate new jwt
 	jwthelper := jwt.NewHelper(c.logger)
-	token, err := jwthelper.GenerateJWT(uint(id), []uint{1})
+	token, err := jwthelper.GenerateJWT(uint(id), uintRoles)
 	if err != nil {
 		c.logger.Error("Error while generating jwt token", zap.Error(err))
 		return nil, app.WrapE(app.ErrInternal, "Error with authorization")

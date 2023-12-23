@@ -25,8 +25,15 @@ func MakeGetAccountEndpoint(s service.IAccountService) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id, err := strconv.Atoi(c.Param("id"))
 		if err != nil {
-			writeJSONResponse(c, app.GetHTTPCodeFromError(app.ErrBadRequest), nil, app.WrapE(app.ErrBadRequest, "Couldn't parse 'id' path param"))
-			return
+			// No error because of debug
+			//writeJSONResponse(c, app.GetHTTPCodeFromError(app.ErrBadRequest), nil, app.WrapE(app.ErrBadRequest, "Couldn't parse 'id' path param"))
+			//return
+		}
+
+		sid, _ := c.GetQuery("id")
+		qid, err := strconv.Atoi(sid)
+		if err == nil {
+			id = qid
 		}
 
 		acc, err := s.GetAccount(uint(id))
@@ -58,8 +65,8 @@ func MakeCreateAccountEndpoint(s service.IAccountService) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var body CreateAccountRequest
 		if err := c.BindJSON(&body); err != nil {
-			writeJSONResponse(c, app.GetHTTPCodeFromError(app.ErrBadRequest), nil, app.WrapE(app.ErrBadRequest, "Couldn't parse json body"))
-			return
+			//writeJSONResponse(c, app.GetHTTPCodeFromError(app.ErrBadRequest), nil, app.WrapE(app.ErrBadRequest, "Couldn't parse json body"))
+			//return
 		}
 
 		cfg := config.GetConfig()
@@ -70,16 +77,27 @@ func MakeCreateAccountEndpoint(s service.IAccountService) gin.HandlerFunc {
 			password_min_length = cfg.Validation.Password.MinLength
 		)
 
-		// Validation
-		v := validator.New()
-		v.RegisterValidation("password", makePasswordValidator(password_min_length, password_max_length))
-		v.RegisterValidation("login", makeLoginValidator(login_min_length, login_max_length))
-		if err := v.Struct(body); err != nil {
-			for _, err := range err.(validator.ValidationErrors) {
-				fmt.Println(err.Field(), err.Tag())
+		login, loginOk := c.GetQuery("login")
+		password, passwordOk := c.GetQuery("password")
+		email, emailOk := c.GetQuery("email")
+		// Implementation of accepting queries and json body with query prioritize
+		if (loginOk && passwordOk) || (emailOk && passwordOk) {
+			body.Login = login
+			body.Password = password
+			body.Email = email
+		} else {
+
+			// Validation
+			v := validator.New()
+			v.RegisterValidation("password", makePasswordValidator(password_min_length, password_max_length))
+			v.RegisterValidation("login", makeLoginValidator(login_min_length, login_max_length))
+			if err := v.Struct(body); err != nil {
+				for _, err := range err.(validator.ValidationErrors) {
+					fmt.Println(err.Field(), err.Tag())
+				}
+				writeJSONResponse(c, app.GetHTTPCodeFromError(app.ErrValidation), nil, app.WrapE(app.ErrValidation, "Body contains invalid data"))
+				return
 			}
-			writeJSONResponse(c, app.GetHTTPCodeFromError(app.ErrValidation), nil, app.WrapE(app.ErrValidation, "Body contains invalid data"))
-			return
 		}
 
 		err := s.CreateAccount(body.Login, body.Password, body.Email)
@@ -89,6 +107,30 @@ func MakeCreateAccountEndpoint(s service.IAccountService) gin.HandlerFunc {
 		}
 
 		writeJSONResponse(c, http.StatusCreated, "New account successfully created.", nil)
+	}
+}
+
+// CreateAccount godoc
+// @Summary Creating new user account
+// @Description Creating new unique user's account
+// @Tags  accounts
+// @Accept  json
+// @Produce json
+// @Param login body string true "User's unique login"
+// @Param password body string true "User's password"
+// @Param email body string true "Valid unique email"
+// @Success 200 {object} string
+// @Router / [post]
+func MakeGetAllAccountsEndpoint(s service.IAccountService) gin.HandlerFunc {
+	return func(c *gin.Context) {
+
+		accs, err := s.GetAllAccounts()
+		if err != nil {
+			writeJSONResponse(c, app.GetHTTPCodeFromError(err), nil, err)
+			return
+		}
+
+		writeJSONResponse(c, http.StatusCreated, accs, nil)
 	}
 }
 
@@ -133,28 +175,41 @@ func MakeDeleteAccountEndpoint(s service.IAccountService) gin.HandlerFunc {
 func MakeLoginEndpoint(s service.IAccountService) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var body LoginRequest
-		if err := c.BindJSON(&body); err != nil {
-			writeJSONResponse(c, app.GetHTTPCodeFromError(app.ErrBadRequest), nil, app.WrapE(app.ErrBadRequest, "Couldn't parse json body"))
-			return
+		if err := c.ShouldBindJSON(&body); err != nil {
+			// No error because of debug
+			//writeJSONResponse(c, app.GetHTTPCodeFromError(app.ErrBadRequest), nil, app.WrapE(app.ErrBadRequest, "Couldn't parse json body"))
+			//return
 		}
 
-		// Validation
-		v := validator.New()
-		if err := v.Struct(body); err != nil {
-			for _, err := range err.(validator.ValidationErrors) {
-				fmt.Println(err.Field(), err.Tag())
+		login, loginOk := c.GetQuery("login")
+		password, passwordOk := c.GetQuery("password")
+		email, emailOk := c.GetQuery("email")
+		// Implementation of accepting queries and json body with query prioritize
+		if (loginOk && passwordOk) || (emailOk && passwordOk) {
+			body.Login = login
+			body.Password = password
+			body.Email = email
+		} else {
+
+			// Validation
+			v := validator.New()
+			if err := v.Struct(body); err != nil {
+				for _, err := range err.(validator.ValidationErrors) {
+					fmt.Println(err.Field(), err.Tag())
+				}
+				writeJSONResponse(c, app.GetHTTPCodeFromError(app.ErrValidation), nil, app.WrapE(app.ErrValidation, "Body contains invalid data"))
+				return
 			}
-			writeJSONResponse(c, app.GetHTTPCodeFromError(app.ErrValidation), nil, app.WrapE(app.ErrValidation, "Body contains invalid data"))
-			return
+
 		}
 
-		id, err := s.Login(body.Login, body.Password, body.Email)
+		id, roles, err := s.Login(body.Login, body.Password, body.Email)
 		if err != nil {
 			writeJSONResponse(c, app.GetHTTPCodeFromError(err), nil, err)
 			return
 		}
 
-		writeJSONResponse(c, http.StatusOK, LoginResponse{UserID: id}, nil)
+		writeJSONResponse(c, http.StatusOK, LoginResponse{UserID: id, Roles: roles}, nil)
 	}
 }
 
@@ -171,8 +226,14 @@ func MakeGetAccountBalanceEndpoint(s service.IAccountService) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id, err := strconv.Atoi(c.Param("id"))
 		if err != nil {
-			writeJSONResponse(c, app.GetHTTPCodeFromError(app.ErrBadRequest), nil, app.WrapE(app.ErrBadRequest, "Couldn't parse 'id' path param"))
-			return
+			//writeJSONResponse(c, app.GetHTTPCodeFromError(app.ErrBadRequest), nil, app.WrapE(app.ErrBadRequest, "Couldn't parse 'id' path param"))
+			//return
+		}
+
+		sid, _ := c.GetQuery("id")
+		qid, err := strconv.Atoi(sid)
+		if err == nil {
+			id = qid
 		}
 
 		var fetchActivity bool

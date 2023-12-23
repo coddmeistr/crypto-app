@@ -45,17 +45,20 @@ func (c *BaseClient) BuildURL(resource string, filters []FilterOptions, pathpara
 	}
 
 	// Parsing and putting path params to the destination url
-	urlwords := strings.Split(resource, "/")
-	for i, v := range urlwords {
-		if len(v) != 0 && v[0] == ':' {
-			if param, ok := pathparams[v[1:]]; ok {
-				urlwords[i] = param
-			} else {
-				return resultURL, fmt.Errorf("failed to parse path parameters. error: %w", err)
+	if pathparams != nil {
+
+		urlwords := strings.Split(resource, "/")
+		for i, v := range urlwords {
+			if len(v) != 0 && v[0] == ':' {
+				if param, ok := pathparams[v[1:]]; ok {
+					urlwords[i] = param
+				} else {
+					return resultURL, fmt.Errorf("failed to parse path parameters. error: %w", err)
+				}
 			}
 		}
+		resource = strings.Join(urlwords, "/")
 	}
-	resource = strings.Join(urlwords, "/")
 
 	// Getting final url with path params and host
 	parsedURL.Path = path.Join(parsedURL.Path, resource)

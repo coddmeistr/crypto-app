@@ -11,7 +11,7 @@ import (
 // Hard coded gouruting block to wait until postgres container starts
 // Oddly depends_on docker-compose param doesn't work
 // In all test cases 5 seconds were enough for postgres to run
-const HARD_WAIT_FOR_POSTGRES_CONTAINER_START = 15 // in seconds
+const HARD_WAIT_FOR_POSTGRES_CONTAINER_START = 3 // in seconds
 
 func InitDB(dbUrl string) (*gorm.DB, error) {
 	time.Sleep(time.Second * HARD_WAIT_FOR_POSTGRES_CONTAINER_START)
@@ -21,9 +21,26 @@ func InitDB(dbUrl string) (*gorm.DB, error) {
 		return nil, err
 	}
 
-	err = db.AutoMigrate(&models.Account{}, &models.Balance{}, &models.Activity{})
+	err = db.AutoMigrate(&models.Account{}, &models.Balance{}, &models.Activity{}, &models.Role{}, &models.AccountRole{})
 	if err != nil {
 		return nil, err
+	}
+
+	var c int64
+	result := db.Model(&models.Role{}).Count(&c)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	if c == 0 {
+		db.Create(&models.Role{
+			Name: "User",
+		})
+		db.Create(&models.Role{
+			Name: "Moderator",
+		})
+		db.Create(&models.Role{
+			Name: "Admin",
+		})
 	}
 
 	return db, nil
