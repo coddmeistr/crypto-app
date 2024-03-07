@@ -24,7 +24,7 @@ class CryptoCardAdapter(private val action: (id: Int)-> Unit): RecyclerView.Adap
         val binding = CryptoCardBinding.bind(itemView)
 
         fun bind(cryptoCard: CryptoCard){
-
+            val b = 3
             val entries: MutableList<Entry> = ArrayList()
             for (data in cryptoCard.miniChart) {
                 // turn your data into Entry objects

@@ -16,7 +16,7 @@ class ChartFragment: Fragment(R.layout.chart_fragment) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val id = this.arguments?.getInt("id",1) ?: 1
+        val id = this.arguments?.getInt("id",1)
 
         binding = ChartFragmentBinding.bind(view)
 
